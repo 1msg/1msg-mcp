@@ -6,7 +6,7 @@ Transports: **stdio** (local) and **Streamable HTTP** (hosted).
 
 | | |
 |--|--|
-| **npm** | `@1msg/mcp` (publish follow-up if not on registry yet) |
+| **npm** | [`@1msg/mcp`](https://www.npmjs.com/package/@1msg/mcp) |
 | **Hosted prod** | https://mcp.1msg.io/mcp |
 | **Hosted stage** | https://mcp.stage.1msg.io/mcp |
 | **SDK** | [`@1msg/sdk`](https://www.npmjs.com/package/@1msg/sdk) |

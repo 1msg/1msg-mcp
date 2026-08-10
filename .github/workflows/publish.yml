@@ -1,0 +1,61 @@
+name: Publish npm
+
+# Publishes @1msg/mcp to the public npm registry.
+#
+# Required secret: NPM_TOKEN (npm publish token for @1msg/*)
+#
+# Typical flow:
+#   Actions → Publish npm → Run workflow (dry_run=true, then false)
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Pack/rehearse only (no npm publish)
+        type: boolean
+        default: true
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish @1msg/mcp
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
+      - name: Smoke tools/list
+        run: npm run smoke:tools-list
+        env:
+          ONE_MSG_BASE_URL: https://api.stage.1msg.io
+          ONE_MSG_INSTANCE_ID: TEST_INSTANCE
+          ONE_MSG_TOKEN: test-token
+
+      - name: npm pack (dry-run always)
+        run: npm pack --dry-run
+
+      - name: npm publish
+        if: ${{ github.event_name == 'push' || inputs.dry_run == false }}
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
