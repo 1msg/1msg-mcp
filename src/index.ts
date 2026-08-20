@@ -16,7 +16,7 @@ function printUsage(): void {
     `  ${PACKAGE_NAME} [--help]`,
     '',
     'Environment variables (required):',
-    '  ONE_MSG_BASE_URL       API root, e.g. https://api.stage.1msg.io',
+    '  ONE_MSG_BASE_URL       API root: https://api.1msg.io or https://sandbox.1msg.io',
     '  ONE_MSG_TOKEN          Channel API token',
     '  ONE_MSG_INSTANCE_ID    Channel instance id',
     '',

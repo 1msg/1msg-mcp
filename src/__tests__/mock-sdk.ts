@@ -13,7 +13,7 @@ export interface MockChatApiClientBundle extends MockChatApiClientMocks {
 /** Jest mock ChatApiClient with call tracking for MCP integration tests. */
 export function createMockChatApiClient(): MockChatApiClientBundle {
   const config = new ChatApiConfig({
-    baseUrl: 'https://api.stage.1msg.io',
+    baseUrl: 'https://api.1msg.io',
     instanceId: 'TEST_INSTANCE',
     token: 'test-token',
   });

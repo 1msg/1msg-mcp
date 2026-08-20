@@ -1,5 +1,9 @@
 import type { IncomingMessage } from 'node:http';
-import type { McpServerConfig } from './config';
+import {
+  isClientSelectableApiHost,
+  normalizeBaseUrl,
+  type McpServerConfig,
+} from './config';
 
 export class McpAuthError extends Error {
   readonly statusCode: number;
@@ -64,8 +68,17 @@ export function extractInstanceId(headers: IncomingMessage['headers']): string {
 }
 
 export interface HttpHostConfig {
-  /** Fixed upstream Chat API root (stage or prod). */
+  /** Default upstream API root (Cloud host env). */
   baseUrl: string;
+}
+
+function extractBaseUrlOverride(
+  headers: IncomingMessage['headers'],
+): string | undefined {
+  return (
+    headerValue(headers, 'x-1msg-base-url') ||
+    headerValue(headers, 'x-base-url')
+  );
 }
 
 /** Build per-request MCP/SDK config from host env + request headers. */
@@ -73,8 +86,29 @@ export function resolveRequestConfig(
   host: HttpHostConfig,
   headers: IncomingMessage['headers'],
 ): McpServerConfig {
+  const override = extractBaseUrlOverride(headers);
+  let baseUrl: string;
+  if (override) {
+    try {
+      baseUrl = normalizeBaseUrl(override);
+    } catch {
+      throw new McpAuthError(
+        'Invalid X-1msg-Base-Url. Use https://api.1msg.io or https://sandbox.1msg.io',
+        400,
+      );
+    }
+    if (!isClientSelectableApiHost(baseUrl)) {
+      throw new McpAuthError(
+        'Unsupported X-1msg-Base-Url. Use https://api.1msg.io or https://sandbox.1msg.io',
+        400,
+      );
+    }
+  } else {
+    baseUrl = normalizeBaseUrl(host.baseUrl);
+  }
+
   return {
-    baseUrl: host.baseUrl,
+    baseUrl,
     token: extractBearerToken(headers),
     instanceId: extractInstanceId(headers),
   };

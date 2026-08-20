@@ -10,7 +10,7 @@ async function main() {
   const serverEntry = path.resolve(__dirname, '../dist/index.js');
   const env = {
     ...process.env,
-    ONE_MSG_BASE_URL: process.env.ONE_MSG_BASE_URL || process.env.CHAT_API_BASE_URL || 'https://api.stage.1msg.io',
+    ONE_MSG_BASE_URL: process.env.ONE_MSG_BASE_URL || process.env.CHAT_API_BASE_URL || 'https://api.1msg.io',
     ONE_MSG_INSTANCE_ID: process.env.ONE_MSG_INSTANCE_ID || process.env.CHAT_API_INSTANCE_ID || 'TEST_INSTANCE',
     ONE_MSG_TOKEN: process.env.ONE_MSG_TOKEN || process.env.CHAT_API_TOKEN || 'test-token',
   };

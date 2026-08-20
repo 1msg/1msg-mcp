@@ -1,6 +1,6 @@
-# Hosted @1msg/mcp (Streamable HTTP)
+# Cloud @1msg/mcp (Streamable HTTP)
 #   docker build -t 1msg/1msg-mcp-http:local .
-#   docker run --rm -p 3100:3100 -e ONE_MSG_BASE_URL=https://api.stage.1msg.io 1msg/1msg-mcp-http:local
+#   docker run --rm -p 3100:3100 -e ONE_MSG_BASE_URL=https://api.1msg.io 1msg/1msg-mcp-http:local
 
 FROM node:20-alpine AS build
 WORKDIR /app
