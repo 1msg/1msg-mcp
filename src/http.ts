@@ -28,7 +28,7 @@ const { createMcpExpressApp } = require('@modelcontextprotocol/sdk/server/expres
 };
 
 const PACKAGE_NAME = '@1msg/mcp';
-const VERSION = '1.2.0';
+const VERSION = '1.2.1';
 
 interface SessionEntry {
   transport: StreamableHTTPServerTransportType;

@@ -18,7 +18,7 @@ const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio
 };
 
 const SERVER_NAME = '@1msg/mcp';
-const SERVER_VERSION = '1.2.0';
+const SERVER_VERSION = '1.2.1';
 
 function serializeToolResult(result: unknown): string {
   if (typeof result === 'string') {
