@@ -47,7 +47,7 @@ jobs:
       - name: Smoke tools/list
         run: npm run smoke:tools-list
         env:
-          ONE_MSG_BASE_URL: https://api.stage.1msg.io
+          ONE_MSG_BASE_URL: https://api.1msg.io
           ONE_MSG_INSTANCE_ID: TEST_INSTANCE
           ONE_MSG_TOKEN: test-token
 

@@ -44,16 +44,41 @@ describe('MCP HTTP auth', () => {
 
   it('builds request config from host + headers', () => {
     const config = resolveRequestConfig(
-      { baseUrl: 'https://api.stage.1msg.io' },
+      { baseUrl: 'https://api.1msg.io' },
       headers({
         authorization: 'Bearer tok',
         'x-instance-id': 'INST',
       }),
     );
     expect(config).toEqual({
-      baseUrl: 'https://api.stage.1msg.io',
+      baseUrl: 'https://api.1msg.io',
       token: 'tok',
       instanceId: 'INST',
     });
+  });
+
+  it('allows sandbox.1msg.io via X-1msg-Base-Url', () => {
+    const config = resolveRequestConfig(
+      { baseUrl: 'https://api.1msg.io' },
+      headers({
+        authorization: 'Bearer tok',
+        'x-instance-id': 'HEI123',
+        'x-1msg-base-url': 'http://sandbox.1msg.io',
+      }),
+    );
+    expect(config.baseUrl).toBe('https://sandbox.1msg.io');
+  });
+
+  it('rejects non-public X-1msg-Base-Url overrides', () => {
+    expect(() =>
+      resolveRequestConfig(
+        { baseUrl: 'https://api.1msg.io' },
+        headers({
+          authorization: 'Bearer tok',
+          'x-instance-id': 'INST',
+          'x-1msg-base-url': 'https://evil.example',
+        }),
+      ),
+    ).toThrow(/Unsupported X-1msg-Base-Url/);
   });
 });

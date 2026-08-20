@@ -6,7 +6,7 @@ import type { McpServer as McpServerType } from '@modelcontextprotocol/sdk/serve
 import type { StreamableHTTPServerTransport as StreamableHTTPServerTransportType } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { ChatApiClient } from '@1msg/sdk';
 import { McpAuthError, resolveRequestConfig } from './auth';
-import { toChatApiConfig } from './config';
+import { normalizeBaseUrl, toChatApiConfig } from './config';
 import { hashIdentifier, logRequest } from './logging';
 import { RateLimiter, rateLimitKeyFromToken } from './rate-limit';
 import { createMcpServer } from './server';
@@ -71,7 +71,7 @@ function loadHttpOptionsFromEnv(): HttpServerOptions {
     .filter(Boolean);
 
   return {
-    baseUrl: baseUrl.replace(/\/$/, ''),
+    baseUrl: normalizeBaseUrl(baseUrl),
     port: readEnvInt('MCP_HTTP_PORT', 3100),
     host: process.env.MCP_HTTP_HOST?.trim() || '0.0.0.0',
     rateLimitRpm: readEnvInt('MCP_RATE_LIMIT_RPM', 60),
@@ -275,7 +275,7 @@ export function createHttpApp(options: HttpServerOptions): import('express').Exp
   return app;
 }
 
-/** Start hosted MCP HTTP server (blocks until listen). */
+/** Start Cloud MCP HTTP server (blocks until listen). */
 export async function startHttpServer(
   options: HttpServerOptions = loadHttpOptionsFromEnv(),
 ): Promise<import('http').Server> {
@@ -310,13 +310,14 @@ function printUsage(): void {
   const lines = [
     `${PACKAGE_NAME} HTTP host v${VERSION}`,
     '',
-    'Streamable HTTP MCP server for the 1msg Chat API.',
+    'Streamable HTTP MCP server for the 1MSG API (Cloud).',
     '',
     'Usage:',
     '  node dist/http.js [--help]',
     '',
     'Environment:',
-    '  ONE_MSG_BASE_URL     Fixed upstream API root (required; alias CHAT_API_BASE_URL)',
+    '  ONE_MSG_BASE_URL     Default upstream API root (required; alias CHAT_API_BASE_URL)',
+    '                        Live: https://api.1msg.io  Test: https://sandbox.1msg.io',
     '  MCP_HTTP_PORT         Listen port (default 3100)',
     '  MCP_HTTP_HOST         Bind address (default 0.0.0.0)',
     '  MCP_RATE_LIMIT_RPM    Per-token requests/minute (default 60)',
@@ -325,6 +326,7 @@ function printUsage(): void {
     'Client headers (per request):',
     '  Authorization: Bearer <channel-token>',
     '  X-Instance-Id: <instance-id>',
+    '  X-1msg-Base-Url: https://api.1msg.io | https://sandbox.1msg.io (optional)',
   ];
   process.stdout.write(`${lines.join('\n')}\n`);
 }
