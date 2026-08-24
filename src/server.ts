@@ -19,11 +19,19 @@ const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio
 };
 
 const SERVER_NAME = '@1msg/mcp';
-const SERVER_VERSION = '1.2.4';
+const SERVER_VERSION = '1.2.5';
 
 function serializeToolResult(result: unknown): string {
   if (typeof result === 'string') {
     return result;
+  }
+  // JSON.stringify(undefined) is undefined (not a string). Cursor then
+  // rejects tools/call because MCP content[].text must be a string.
+  // Published @1msg/sdk createUploadMedia is void and used to hit this.
+  if (result === undefined) {
+    return JSON.stringify({
+      error: 'API returned no JSON body. Hosted MCP polyfills create_upload_media; use url or body.',
+    });
   }
   return JSON.stringify(result, null, 2);
 }

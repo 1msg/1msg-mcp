@@ -112,4 +112,29 @@ describe('createMcpServer tools/call', () => {
     await client.close();
     await server.close();
   });
+
+  it('returns JSON text when a tool result is void (Cursor requires content[].text)', async () => {
+    const mockClient = createMockClient();
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const server = createMcpServer(mockClient);
+    await server.connect(serverTransport);
+
+    const client = new Client({ name: 'test-client', version: '1.0.0' });
+    await client.connect(clientTransport);
+
+    const result = await client.callTool({
+      name: 'create_upload_media',
+      arguments: { url: 'https://example.com/file.jpg' },
+    });
+
+    const content = result.content as Array<{ type: string; text?: string }> | undefined;
+    expect(typeof content?.[0]?.text).toBe('string');
+    expect(content?.[0]?.text?.length).toBeGreaterThan(0);
+    expect(JSON.parse(content?.[0]?.text as string)).toEqual(
+      expect.objectContaining({ error: expect.any(String) }),
+    );
+
+    await client.close();
+    await server.close();
+  });
 });
