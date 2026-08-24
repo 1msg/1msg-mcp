@@ -85,8 +85,7 @@ function missingEnvMessage(missing: string[]): string {
     'Missing required environment variables for @1msg/mcp:',
     ...missing.map((name) => `  - ${name}`),
     '',
-    'Prefer ONE_MSG_BASE_URL, ONE_MSG_TOKEN, and ONE_MSG_INSTANCE_ID.',
-    'Deprecated aliases still work: CHAT_API_BASE_URL, CHAT_API_TOKEN, CHAT_API_INSTANCE_ID (or INSTANCE_ID).',
+    'Set ONE_MSG_BASE_URL, ONE_MSG_TOKEN, and ONE_MSG_INSTANCE_ID.',
     'Live channels: ONE_MSG_BASE_URL=https://api.1msg.io',
     'Test channels: ONE_MSG_BASE_URL=https://sandbox.1msg.io',
     'Example:',
@@ -107,7 +106,7 @@ export function loadMcpConfig(): McpServerConfig {
     'CHAT_API_URL',
   ]);
   if (!baseUrl) {
-    missing.push('ONE_MSG_BASE_URL (or deprecated CHAT_API_BASE_URL)');
+    missing.push('ONE_MSG_BASE_URL');
   }
 
   const token = readEnv('ONE_MSG_TOKEN', [
@@ -116,7 +115,7 @@ export function loadMcpConfig(): McpServerConfig {
     'TOKEN',
   ]);
   if (!token) {
-    missing.push('ONE_MSG_TOKEN (or deprecated CHAT_API_TOKEN)');
+    missing.push('ONE_MSG_TOKEN');
   }
 
   const instanceId = readEnv('ONE_MSG_INSTANCE_ID', [
@@ -124,7 +123,7 @@ export function loadMcpConfig(): McpServerConfig {
     'INSTANCE_ID',
   ]);
   if (!instanceId) {
-    missing.push('ONE_MSG_INSTANCE_ID (or deprecated CHAT_API_INSTANCE_ID / INSTANCE_ID)');
+    missing.push('ONE_MSG_INSTANCE_ID');
   }
 
   if (missing.length > 0) {

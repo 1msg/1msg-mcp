@@ -33,8 +33,8 @@ async function main() {
     console.log(`tools/list: ${count} tools`);
     console.log(`send_message present: ${hasSendMessage}`);
 
-    if (count !== 60) {
-      throw new Error(`Expected 60 tools, got ${count}`);
+    if (count !== 62) {
+      throw new Error(`Expected 62 tools, got ${count}`);
     }
     if (!hasSendMessage) {
       throw new Error('send_message tool missing');

@@ -4,7 +4,7 @@ import { loadMcpConfig } from './config';
 import { startMcpServer } from './server';
 
 const PACKAGE_NAME = '@1msg/mcp';
-const VERSION = '1.2.1';
+const VERSION = '1.2.2';
 
 function printUsage(): void {
   const lines = [
@@ -19,9 +19,6 @@ function printUsage(): void {
     '  ONE_MSG_BASE_URL       API root: https://api.1msg.io or https://sandbox.1msg.io',
     '  ONE_MSG_TOKEN          Channel API token',
     '  ONE_MSG_INSTANCE_ID    Channel instance id',
-    '',
-    'Deprecated aliases still accepted: CHAT_API_BASE_URL / CHAT_API_TOKEN /',
-    'CHAT_API_INSTANCE_ID (or INSTANCE_ID).',
     '',
     'The server exposes all public 1msg API operations as MCP tools',
     'and delegates HTTP calls to the @1msg/sdk package.',

@@ -6,6 +6,7 @@ import { toChatApiConfig } from './config';
 import { invokeGeneratedTool } from './handlers.generated';
 import { GENERATED_MCP_TOOLS } from './tools.generated';
 import { jsonSchemaToZod } from './json-schema-to-zod';
+import { polyfillChannelSettings } from './polyfill-channel-settings';
 
 // CJS runtime requires explicit .js subpath exports from the MCP SDK package.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -18,7 +19,7 @@ const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio
 };
 
 const SERVER_NAME = '@1msg/mcp';
-const SERVER_VERSION = '1.2.1';
+const SERVER_VERSION = '1.2.2';
 
 function serializeToolResult(result: unknown): string {
   if (typeof result === 'string') {
@@ -54,6 +55,7 @@ function formatToolError(error: unknown): string {
 
 /** Create MCP server with all generated Chat API tools. */
 export function createMcpServer(client: ChatApiClient): McpServerType {
+  polyfillChannelSettings(client);
   const server = new McpServer({
     name: SERVER_NAME,
     version: SERVER_VERSION,

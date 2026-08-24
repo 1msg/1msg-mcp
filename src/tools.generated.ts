@@ -86,7 +86,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "create_commerce",
     "operationId": "createCommerce",
-    "description": "Set Commerce Settings",
+    "description": "Update catalog/cart commerce settings via the `params` object.\n\n- `params.is_catalog_visible` — show catalog storefront icon (`true`) or hide it (`false`).\n- `params.is_cart_enabled` — enable cart (`true`) or disable it (`false`).\n\nBlocked when the channel subscription limit is exceeded.\nRequires a commerce-capable channel (Cloud Functions `/commerceWAV2`).\n",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -121,18 +121,61 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "create_flows",
     "operationId": "createFlows",
-    "description": "Create Flow",
+    "description": "Create a WhatsApp Flow (`name` + `categories` required).\nCurrently returns HTTP 501 until the Meta Graph Flows rewrite is available.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
         "wabaAccountId": {
           "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "description": "Flow name"
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "SIGN_UP",
+              "SIGN_IN",
+              "APPOINTMENT_BOOKING",
+              "LEAD_GENERATION",
+              "CONTACT_US",
+              "CUSTOMER_SUPPORT",
+              "SURVEY",
+              "OTHER"
+            ]
+          },
+          "description": "One or more Flow categories"
+        },
+        "endpointUri": {
+          "type": "string",
+          "description": "HTTPS endpoint for the Flow data channel"
+        },
+        "publish": {
+          "type": "boolean",
+          "description": "Publish immediately after create"
+        },
+        "flowJson": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Optional Flow JSON document"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "categories"
+      ]
     },
     "inputFields": [
-      "wabaAccountId"
+      "wabaAccountId",
+      "name",
+      "categories",
+      "endpointUri",
+      "publish",
+      "flowJson"
     ]
   },
   {
@@ -191,20 +234,47 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
     "description": "Create Group",
     "inputSchema": {
       "type": "object",
-      "properties": {},
-      "additionalProperties": false
+      "properties": {
+        "groupName": {
+          "type": "string",
+          "description": "Group subject / name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional group description"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "groupName"
+      ]
     },
-    "inputFields": []
+    "inputFields": [
+      "groupName",
+      "description"
+    ]
   },
   {
     "name": "create_groups_group_id",
     "operationId": "createGroupsGroupId",
-    "description": "Update Group Info",
+    "description": "Update group subject, description, and/or profile picture.\nPath `groupId` is the WABA group id (without `@g.us`).\n",
     "inputSchema": {
       "type": "object",
       "properties": {
         "groupId": {
           "type": "string"
+        },
+        "subject": {
+          "type": "string",
+          "description": "New group subject / name"
+        },
+        "description": {
+          "type": "string",
+          "description": "New group description"
+        },
+        "profile_picture_file": {
+          "type": "string",
+          "description": "Image URL or base64 data URI for the group profile picture"
         }
       },
       "additionalProperties": false,
@@ -213,7 +283,10 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
       ]
     },
     "inputFields": [
-      "groupId"
+      "groupId",
+      "subject",
+      "description",
+      "profile_picture_file"
     ]
   },
   {
@@ -264,22 +337,74 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
     ]
   },
   {
-    "name": "create_upload_media",
-    "operationId": "createUploadMedia",
-    "description": "Upload media",
+    "name": "create_settings",
+    "operationId": "createSettings",
+    "description": "Update channel settings. Only send fields you want to change.\n\n`webhookUrl` **replaces** the stored list (one URL string, or up to 5 URLs as an array).\nPassing an empty value clears webhooks.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "payload": {
-          "type": "object",
-          "additionalProperties": true,
-          "description": "Request body payload"
+        "webhookUrl": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ],
+          "description": "Replacement webhook URL, or array of URLs (max 5)"
+        },
+        "guaranteedHooks": {
+          "type": "boolean"
+        },
+        "ackNotificationsOn": {
+          "type": "boolean"
+        },
+        "rawHooks": {
+          "type": "boolean"
+        },
+        "template_analytics_enabled": {
+          "type": "boolean"
+        },
+        "cta_url_link_tracking_opted_out": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false
     },
     "inputFields": [
-      "payload"
+      "webhookUrl",
+      "guaranteedHooks",
+      "ackNotificationsOn",
+      "rawHooks",
+      "template_analytics_enabled",
+      "cta_url_link_tracking_opted_out"
+    ]
+  },
+  {
+    "name": "create_upload_media",
+    "operationId": "createUploadMedia",
+    "description": "Upload a file to WhatsApp media storage and get a numeric `mediaId`\nfor later use with `send_file` / `send_sticker` (`mediaId` field, not `body`).\n\nPass the file as `body` **or** `url` — an HTTP(S) URL or a base64 data URI.\nThe `mediaId` in the response is a numeric string (keep it as a string).\n",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "body": {
+          "type": "string",
+          "description": "File HTTP(S) URL or base64 data URI (`data:<mime>;base64,...`)"
+        },
+        "url": {
+          "type": "string",
+          "description": "Alias for `body` — public HTTP(S) URL of the file to upload"
+        }
+      },
+      "additionalProperties": false
+    },
+    "inputFields": [
+      "body",
+      "url"
     ]
   },
   {
@@ -330,7 +455,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "delete_media",
     "operationId": "deleteMedia",
-    "description": "Delete media from WABA storage",
+    "description": "Delete previously uploaded media by numeric `mediaId` (from `/uploadMedia`).\n\nThis is the canonical deletion endpoint and uses the REST `DELETE` verb on the\nmedia resource path. The older `POST /deleteMedia` is a deprecated alias.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -351,7 +476,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "delete_media_legacy",
     "operationId": "deleteMediaLegacy",
-    "description": "Delete media from WABA storage (deprecated alias)",
+    "description": "**Deprecated.** Use `DELETE /media/{mediaId}` instead.\n\nThis POST alias is kept for backward compatibility with earlier integrations.\nNew integrations should call `DELETE /media/{mediaId}`: 1msg follows REST\nconventions for resource deletion going forward (delete a resource with the\n`DELETE` verb on its resource path).\n",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -372,7 +497,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "get_calling_settings",
     "operationId": "getCallingSettings",
-    "description": "Get calling settings",
+    "description": "Return WhatsApp Calling API settings for this channel (beta).\n\nProxies upstream `GET /calling/settings`.\n\n**Prerequisites**\n- Number must be eligible for Meta Calling (Cloud API; not COEX)\n- Trial / `subscriptionBlocked` channels receive **403** plain text\n- You need your own WebRTC or SIP stack; 1msg is a **signaling proxy** only\n  and does **not** store call history or recordings\n\nSee the **Calling** tag overview for inbound/outbound flows and webhooks.\n",
     "inputSchema": {
       "type": "object",
       "properties": {},
@@ -383,7 +508,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "get_commerce",
     "operationId": "getCommerce",
-    "description": "Get Commerce Settings",
+    "description": "Returns catalog/cart commerce settings for the channel.\n\nFails with a provider error when the WABA has no catalog linked — that is an\nAPI/account limitation, not an MCP schema bug.\n\n- `is_catalog_visible` — show catalog storefront icon (`true`) or hide it (`false`).\n- `is_cart_enabled` — enable cart (`true`) or disable it (`false`).\n",
     "inputSchema": {
       "type": "object",
       "properties": {},
@@ -394,7 +519,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "get_conversational_automation",
     "operationId": "getConversationalAutomation",
-    "description": "Get conversational automation settings",
+    "description": "Get WhatsApp conversational components for the channel (welcome message,\nice-breaker prompts, and slash commands).\n\nProxies Meta/360dialog `GET /conversational_automation`.\n\nWhen `enable_welcome_message` is true and a user opens chat for the first\ntime, Meta delivers a webhook message with `type: request_welcome`. The\ninbound formatter exposes that as `type: \"request_welcome\"` and\n`meta.request_welcome: true` so your webhook can send a custom welcome reply.\n",
     "inputSchema": {
       "type": "object",
       "properties": {},
@@ -461,6 +586,10 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
       "properties": {
         "groupId": {
           "type": "string"
+        },
+        "fields": {
+          "type": "string",
+          "description": "Comma-separated group fields to return"
         }
       },
       "additionalProperties": false,
@@ -469,7 +598,8 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
       ]
     },
     "inputFields": [
-      "groupId"
+      "groupId",
+      "fields"
     ]
   },
   {
@@ -495,7 +625,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "get_me",
     "operationId": "getMe",
-    "description": "Get Profile Info",
+    "description": "Get WhatsApp Business Account profile information",
     "inputSchema": {
       "type": "object",
       "properties": {},
@@ -517,7 +647,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "get_status",
     "operationId": "getStatus",
-    "description": "Get channel status",
+    "description": "Returns WhatsApp Business API client connection status.",
     "inputSchema": {
       "type": "object",
       "properties": {},
@@ -528,7 +658,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "get_webhook",
     "operationId": "getWebhook",
-    "description": "Get webhook URL",
+    "description": "Returns the configured client webhook URL for this channel.",
     "inputSchema": {
       "type": "object",
       "properties": {},
@@ -539,7 +669,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "get_whatsapp_business_encryption",
     "operationId": "getWhatsappBusinessEncryption",
-    "description": "Get business encryption public key",
+    "description": "Retrieve the WhatsApp business public key and signature status for this channel's\nphone number. Required before publishing or sending Flows that use data encryption.\n",
     "inputSchema": {
       "type": "object",
       "properties": {},
@@ -550,26 +680,91 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "initiate_call",
     "operationId": "initiateCall",
-    "description": "Initiate WhatsApp call",
+    "description": "Perform a WhatsApp Calling action (beta).\n\nProxies upstream `POST /calling/calls`. Despite the historical path\nname `/initiateCall`, this endpoint handles **all** call actions:\n\n| action | Use | Required |\n|--------|-----|----------|\n| `connect` | Outbound business → user | `to` + `session` (`sdp_type: offer`) |\n| `pre_accept` | Inbound (optional, reduces audio clipping) | `call_id` + `session` (`sdp_type: answer`) |\n| `accept` | Inbound answer | `call_id` + `session` (`sdp_type: answer`) |\n| `reject` | Decline inbound | `call_id` |\n| `terminate` | Hang up | `call_id` |\n\n**SDP / media (critical)**\n- `accept` / `pre_accept` require a **WebRTC-generated SDP answer**.\n- Do **not** send Meta's offer SDP back as the answer.\n- Postman (or curl) alone **cannot** establish real media — you need a\n  WebRTC or SIP stack. 1msg only proxies signaling.\n\nAnswer within ~**30–60 seconds** of an inbound `connect` webhook or Meta\nterminates as unanswered. Common Meta errors include Calling not enabled\n(`138000`), no permission (`138006`), SDP validation failures.\n\n**Outbound** requires a prior Call Permission Request (CPR) acceptance.\nSee the **Calling** tag overview for the full outbound flow and CPR limits.\n\nTrial / `subscriptionBlocked` → **403** plain text.\nUpstream failures often return HTTP 200 with `{ \"response\": { \"error\": \"...\" } }`.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "payload": {
+        "messaging_product": {
+          "type": "string",
+          "description": "Must be `whatsapp`",
+          "enum": [
+            "whatsapp"
+          ],
+          "example": "whatsapp"
+        },
+        "action": {
+          "type": "string",
+          "description": "Call control action",
+          "enum": [
+            "connect",
+            "pre_accept",
+            "accept",
+            "reject",
+            "terminate"
+          ],
+          "example": "connect"
+        },
+        "call_id": {
+          "type": "string",
+          "description": "WhatsApp call id from the inbound/outbound calls webhook (`calls[].id`).\nRequired for `pre_accept`, `accept`, `reject`, `terminate`.\n",
+          "example": "wacid.ABGGFjFVU2AfAgo6V-Hc5eCgK5Gh"
+        },
+        "to": {
+          "type": "string",
+          "description": "Recipient WhatsApp user phone (digits, country code, no +).\nRequired for outbound `connect`.\n",
+          "example": "12185552828"
+        },
+        "biz_opaque_callback_data": {
+          "type": "string",
+          "description": "Optional opaque string echoed on later call webhooks for correlation",
+          "maxLength": 512,
+          "example": "order-123-callback"
+        },
+        "session": {
           "type": "object",
-          "additionalProperties": true,
-          "description": "Request body payload"
+          "description": "WebRTC SDP session (required for connect / pre_accept / accept)",
+          "required": [
+            "sdp_type",
+            "sdp"
+          ],
+          "properties": {
+            "sdp_type": {
+              "type": "string",
+              "description": "offer for outbound connect; answer for pre_accept/accept",
+              "enum": [
+                "offer",
+                "answer"
+              ],
+              "example": "offer"
+            },
+            "sdp": {
+              "type": "string",
+              "description": "Full SDP (RFC 8866). Replace placeholders with SDP from your WebRTC stack.\nMust negotiate ICE, DTLS-SRTP, and OPUS for WhatsApp media.\n",
+              "example": "[REPLACE_WITH_WEBRTC_SDP]"
+            }
+          },
+          "additionalProperties": true
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "required": [
+        "messaging_product",
+        "action"
+      ]
     },
     "inputFields": [
-      "payload"
+      "messaging_product",
+      "action",
+      "call_id",
+      "to",
+      "biz_opaque_callback_data",
+      "session"
     ]
   },
   {
     "name": "list_blocked_users",
     "operationId": "listBlockedUsers",
-    "description": "List blocked WhatsApp users",
+    "description": "Returns users currently blocked on this WhatsApp channel (WABA `GET /block_users`).\nSame channel token auth as `blockUser` / `unblockUser`.\n",
     "inputSchema": {
       "type": "object",
       "properties": {},
@@ -580,35 +775,108 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "list_flows",
     "operationId": "listFlows",
-    "description": "List Flows",
+    "description": "List WhatsApp Flows for the WABA.\nCurrently returns HTTP 501 until the Meta Graph Flows rewrite is available.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
         "wabaAccountId": {
           "type": "string"
+        },
+        "fields": {
+          "type": "string",
+          "description": "Comma-separated Flow fields to return"
         }
       },
       "additionalProperties": false
     },
     "inputFields": [
-      "wabaAccountId"
+      "wabaAccountId",
+      "fields"
     ]
   },
   {
     "name": "list_groups",
     "operationId": "listGroups",
-    "description": "Get Groups List",
+    "description": "List WhatsApp groups for this channel. Paginate with `limit`, `before`, and `after`.",
     "inputSchema": {
       "type": "object",
-      "properties": {},
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "description": "Max groups to return"
+        },
+        "before": {
+          "type": "string",
+          "description": "Cursor for the previous page"
+        },
+        "after": {
+          "type": "string",
+          "description": "Cursor for the next page"
+        }
+      },
       "additionalProperties": false
     },
-    "inputFields": []
+    "inputFields": [
+      "limit",
+      "before",
+      "after"
+    ]
   },
   {
     "name": "list_messages",
     "operationId": "listMessages",
-    "description": "Get messages list",
+    "description": "List stored chat history for this channel (requires history storage).\nFilter with `chatId`, `limit`, `last`, message numbers, or time bounds.\n",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "chatId": {
+          "type": "string",
+          "description": "Filter messages for one chat (`phone@c.us`, group `@g.us`, or BSUID `@lid`)"
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Max rows to return (default 100)"
+        },
+        "last": {
+          "type": "boolean",
+          "description": "If true, return the latest messages (DESC). Default false."
+        },
+        "lastMessageNumber": {
+          "type": "integer"
+        },
+        "firstMessageNumber": {
+          "type": "integer"
+        },
+        "min_time": {
+          "type": "integer",
+          "description": "Unix timestamp lower bound"
+        },
+        "max_time": {
+          "type": "integer",
+          "description": "Unix timestamp upper bound"
+        },
+        "msgId": {
+          "type": "string",
+          "description": "Filter by stored message id"
+        }
+      },
+      "additionalProperties": false
+    },
+    "inputFields": [
+      "chatId",
+      "limit",
+      "last",
+      "lastMessageNumber",
+      "firstMessageNumber",
+      "min_time",
+      "max_time",
+      "msgId"
+    ]
+  },
+  {
+    "name": "list_settings",
+    "operationId": "listSettings",
+    "description": "Return channel settings: webhook URL(s), delivery flags, and analytics toggles.\n\nThis is the same `GET /settings` endpoint as the REST API (previously missing from MCP).\n",
     "inputSchema": {
       "type": "object",
       "properties": {},
@@ -619,18 +887,38 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "list_templates",
     "operationId": "listTemplates",
-    "description": "Get templates list",
+    "description": "List message templates. Paginate with `limit` / `offset`; sort by `id`, `name`, or `status`.",
     "inputSchema": {
       "type": "object",
-      "properties": {},
+      "properties": {
+        "limit": {
+          "type": "integer"
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "sort": {
+          "type": "string",
+          "enum": [
+            "id",
+            "name",
+            "status"
+          ],
+          "description": "Sort field (`id`, `name`, or `status`)"
+        }
+      },
       "additionalProperties": false
     },
-    "inputFields": []
+    "inputFields": [
+      "limit",
+      "offset",
+      "sort"
+    ]
   },
   {
     "name": "patch_flows_flow_id_assets",
     "operationId": "patchFlowsFlowIdAssets",
-    "description": "Update Flow Structure",
+    "description": "Replace the Flow JSON document (`flowJson`).\nCurrently returns HTTP 501 until the Meta Graph Flows rewrite is available.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -640,22 +928,29 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
         },
         "wabaAccountId": {
           "type": "string"
+        },
+        "flowJson": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "WhatsApp Flow JSON document"
         }
       },
       "additionalProperties": false,
       "required": [
-        "flowId"
+        "flowId",
+        "flowJson"
       ]
     },
     "inputFields": [
       "flowId",
-      "wabaAccountId"
+      "wabaAccountId",
+      "flowJson"
     ]
   },
   {
     "name": "patch_flows_flow_id_metadata",
     "operationId": "patchFlowsFlowIdMetadata",
-    "description": "Update Flow Metadata",
+    "description": "Update Flow `name`, `categories`, and/or `endpointUri`.\nCurrently returns HTTP 501 until the Meta Graph Flows rewrite is available.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -665,6 +960,29 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
         },
         "wabaAccountId": {
           "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "SIGN_UP",
+              "SIGN_IN",
+              "APPOINTMENT_BOOKING",
+              "LEAD_GENERATION",
+              "CONTACT_US",
+              "CUSTOMER_SUPPORT",
+              "SURVEY",
+              "OTHER"
+            ]
+          }
+        },
+        "endpointUri": {
+          "type": "string",
+          "description": "HTTPS endpoint for the Flow data channel"
         }
       },
       "additionalProperties": false,
@@ -674,32 +992,37 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
     },
     "inputFields": [
       "flowId",
-      "wabaAccountId"
+      "wabaAccountId",
+      "name",
+      "categories",
+      "endpointUri"
     ]
   },
   {
     "name": "remove_template",
     "operationId": "removeTemplate",
-    "description": "Remove message template",
+    "description": "Delete a message template by `name` (all language versions of that name).",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "payload": {
-          "type": "object",
-          "additionalProperties": true,
-          "description": "Request body payload"
+        "name": {
+          "type": "string",
+          "description": "Template name to delete"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ]
     },
     "inputFields": [
-      "payload"
+      "name"
     ]
   },
   {
     "name": "retrieve_media",
     "operationId": "retrieveMedia",
-    "description": "Retrieve uploaded media metadata",
+    "description": "Get WABA media URL and metadata by mediaId (from uploadMedia).\nThe returned `url` is temporary and typically expires within ~5 minutes.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -719,12 +1042,13 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "send_address_message",
     "operationId": "sendAddressMessage",
-    "description": "Send address request message",
+    "description": "Request shipping address from the user (WhatsApp interactive `address_message`).\n\n**India and Singapore only.** Requires:\n- Business WhatsApp number registered in that country\n- Recipient phone matching the country (`+91` ↔ `IN`, `+65` ↔ `SG`)\n\nPass `country: \"IN\"` or `country: \"SG\"`. Eligibility is validated upstream;\nmismatches (e.g. Singapore phone with `country: \"IN\"`) return errors such as\n`Unsupported Interactive Message type` (HTTP 200 with `sent: false`).\n\nOptional action parameters: `values`, `saved_addresses`, `validation_errors`.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
         "phone": {
-          "type": "integer"
+          "type": "integer",
+          "description": "Recipient phone (E.164 digits, no +). Must match country."
         },
         "chatId": {
           "type": "string"
@@ -732,6 +1056,33 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
         "body": {
           "type": "string",
           "description": "Body text shown with the address request"
+        },
+        "country": {
+          "type": "string",
+          "enum": [
+            "IN",
+            "SG"
+          ],
+          "description": "Address form country. Defaults to IN if omitted.",
+          "example": "SG"
+        },
+        "values": {
+          "type": "object",
+          "description": "Optional prefilled address fields",
+          "additionalProperties": true
+        },
+        "saved_addresses": {
+          "type": "array",
+          "description": "Optional previously saved addresses for the user",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "validation_errors": {
+          "type": "object",
+          "description": "Optional field validation errors when re-prompting",
+          "additionalProperties": true
         },
         "quotedMsgId": {
           "type": "string"
@@ -746,6 +1097,10 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
       "phone",
       "chatId",
       "body",
+      "country",
+      "values",
+      "saved_addresses",
+      "validation_errors",
       "quotedMsgId"
     ]
   },
@@ -757,13 +1112,34 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
       "type": "object",
       "properties": {
         "phone": {
-          "type": "string"
+          "type": "string",
+          "description": "Recipient phone with country code. Use phone or chatId."
+        },
+        "chatId": {
+          "type": "string",
+          "description": "Recipient chat ID (`phone@c.us`, group `@g.us`, or BSUID `@lid`). Use phone or chatId."
+        },
+        "quotedMsgId": {
+          "type": "string",
+          "description": "Optional Cloud API wamid to quote"
         },
         "body": {
           "type": "string"
         },
         "footer": {
           "type": "string"
+        },
+        "header": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Optional interactive header (text/image/video/document)"
+        },
+        "buttons": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "description": "Legacy alias for sections (`[{id,title}]`)"
         },
         "sections": {
           "type": "array",
@@ -793,44 +1169,61 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
     },
     "inputFields": [
       "phone",
+      "chatId",
+      "quotedMsgId",
       "body",
       "footer",
+      "header",
+      "buttons",
       "sections"
     ]
   },
   {
     "name": "send_carousel",
     "operationId": "sendCarousel",
-    "description": "Send Carousel",
+    "description": "You can send product cards via Carousel in two ways:\n\nTemplate messages: do not require a 24-hour customer service window between you and the recipient. Use sendTemplate.\n\nFree-form messages: can be sent only when a customer service window is open between you and the recipient. Use sendCarousel.\n\nThe message structure in /sendCarousel is largely similar to sending a template. However, in this case you must \nexplicitly specify all elements that are created in advance when working with templates. This is because the message \nis sent without using a template.\n\nIn /sendCarousel, for a Catalog Carousel there can be either 1 URL button or one or more quick reply buttons.\n\nPrefer the simple `cards` array (2–10 cards). Each card needs a header media/product\nplus a CTA URL or quick-reply buttons. Example:\n\n```json\n{\n  \"phone\": \"79001234567\",\n  \"body\": \"Pick a product\",\n  \"cards\": [\n    {\n      \"header\": { \"type\": \"image\", \"image\": { \"link\": \"https://example.com/1.jpg\" } },\n      \"body\": { \"text\": \"Card one\" },\n      \"type\": \"cta_url\",\n      \"action\": { \"name\": \"cta_url\", \"parameters\": { \"url\": \"https://example.com/p1\", \"display_text\": \"Open\" } }\n    },\n    {\n      \"header\": { \"type\": \"image\", \"image\": { \"link\": \"https://example.com/2.jpg\" } },\n      \"body\": { \"text\": \"Card two\" },\n      \"type\": \"cta_url\",\n      \"action\": { \"name\": \"cta_url\", \"parameters\": { \"url\": \"https://example.com/p2\", \"display_text\": \"Open\" } }\n    }\n  ]\n}\n```\n\n`params` with a `CAROUSEL` component is the template-like alternative.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
         "body": {
-          "type": "string"
+          "type": "string",
+          "description": "Text shown above the carousel"
+        },
+        "cards": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 10,
+          "description": "Preferred. 2–10 carousel cards.",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
         },
         "params": {
           "type": "array",
           "items": {
             "type": "object"
-          }
+          },
+          "description": "Template-like alternative — include a CAROUSEL component with cards"
         },
         "quotedMsgId": {
-          "type": "string"
+          "type": "string",
+          "description": "Quoted message ID (Cloud API)"
         },
         "chatId": {
-          "type": "string"
+          "type": "string",
+          "description": "Required if phone is not set. Chat ID from the message list. Examples: 12020721369@c.us or 120363046942338209@g.us(group)"
         },
         "phone": {
-          "type": "integer"
+          "type": "integer",
+          "description": "Required if chatId is not set. A phone number starting with the country code. USA example: 12020721369."
         }
       },
-      "additionalProperties": false,
-      "required": [
-        "params"
-      ]
+      "additionalProperties": false
     },
     "inputFields": [
       "body",
+      "cards",
       "params",
       "quotedMsgId",
       "chatId",
@@ -840,12 +1233,56 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "send_contact",
     "operationId": "sendContact",
-    "description": "Send a Contact",
+    "description": "Send a WhatsApp contact card.\n\nPreferred simple body (legacy-compatible):\n\n```json\n{\n  \"phone\": \"79001234567\",\n  \"contact\": { \"name\": \"Lida\", \"phone\": \"+79181976551\" }\n}\n```\n\nCloud API shape also works: `contacts` is an array of objects with\n`name.formatted_name` and `phones[].phone` (E.164 string, **not** a timestamp).\n",
     "inputSchema": {
       "type": "object",
       "properties": {
         "phone": {
+          "type": "string",
+          "description": "Recipient phone with country code. Use phone or chatId."
+        },
+        "chatId": {
+          "type": "string",
+          "description": "Recipient chat ID (`phone@c.us`, group `@g.us`, or BSUID `@lid`). Use phone or chatId."
+        },
+        "quotedMsgId": {
           "type": "string"
+        },
+        "contact": {
+          "type": "object",
+          "description": "Simple contact card. Use this or `contacts`.",
+          "required": [
+            "name",
+            "phone"
+          ],
+          "properties": {
+            "name": {
+              "description": "Display name (string) or Cloud API name object",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              ]
+            },
+            "phone": {
+              "type": "string",
+              "description": "Contact phone in E.164 (`+79181976551`), not a timestamp"
+            },
+            "email": {
+              "type": "string"
+            },
+            "org": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "url": {
+              "type": "string"
+            }
+          }
         },
         "contacts": {
           "type": "array",
@@ -880,11 +1317,17 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
               },
               "addresses": {
                 "type": "array",
-                "items": {}
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
               },
               "emails": {
                 "type": "array",
-                "items": {}
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
               },
               "org": {
                 "type": "object",
@@ -907,7 +1350,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
                   "properties": {
                     "phone": {
                       "type": "string",
-                      "format": "utc-millisec"
+                      "description": "E.164 phone (`+79181976551`). Not a timestamp."
                     },
                     "type": {
                       "type": "string"
@@ -920,7 +1363,10 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
               },
               "urls": {
                 "type": "array",
-                "items": {}
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
               }
             }
           }
@@ -930,13 +1376,16 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
     },
     "inputFields": [
       "phone",
+      "chatId",
+      "quotedMsgId",
+      "contact",
       "contacts"
     ]
   },
   {
     "name": "send_cta_url",
     "operationId": "sendCtaUrl",
-    "description": "Send CTA URL interactive message",
+    "description": "Send an interactive message with a single call-to-action URL button.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -989,7 +1438,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "send_file",
     "operationId": "sendFile",
-    "description": "Send a File",
+    "description": "Send a file to an existing chat. (Only if the dialogue has an Open Session). \nOnly one of two parameters is needed to determine the destination - chatId or phone.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1050,12 +1499,13 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "send_flow",
     "operationId": "sendFlow",
-    "description": "Send WhatsApp Flow Message",
+    "description": "Send Interactive WhatsApp Flow message to an existing chat. (Only if the dialogue has an Open Session). \nOnly one of two parameters is needed to determine the destination - chatId or phone.\n\nUse this method to send a published WhatsApp Flow as a service (interactive) message. \nIf the 24-hour window is closed, send a template with a FLOW button via /sendTemplate.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
         "body": {
-          "type": "string"
+          "type": "string",
+          "description": "Flow message body text"
         },
         "header": {
           "oneOf": [
@@ -1065,54 +1515,68 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
             {
               "type": "object"
             }
-          ]
+          ],
+          "description": "Flow header (string or text header object)"
         },
         "footer": {
-          "type": "string"
+          "type": "string",
+          "description": "Footer text"
         },
         "flowId": {
-          "type": "string"
+          "type": "string",
+          "description": "Published Flow ID"
         },
         "flowToken": {
-          "type": "string"
+          "type": "string",
+          "description": "Flow token generated by the business"
         },
         "flowCta": {
-          "type": "string"
+          "type": "string",
+          "description": "CTA button text"
         },
         "flowAction": {
           "type": "string",
           "enum": [
             "navigate",
             "data_exchange"
-          ]
+          ],
+          "description": "Flow action type"
         },
         "flowActionPayload": {
-          "type": "object"
+          "type": "object",
+          "description": "Required for flowAction=navigate (screen is required). Ignored for data_exchange. If data is provided, it must be a non-empty object."
         },
         "flowMessageVersion": {
-          "type": "string"
+          "type": "string",
+          "description": "Flow message version (default \"3\")"
         },
         "mode": {
           "type": "string",
           "enum": [
             "draft",
             "published"
-          ]
+          ],
+          "description": "Flow mode (draft or published). If omitted, provider default applies"
         },
         "flowActionData": {
-          "type": "object"
+          "type": "object",
+          "description": "Shortcut for flowActionPayload.data (optional)"
         },
         "flowActionScreen": {
-          "type": "string"
+          "type": "string",
+          "description": "Shortcut for flowActionPayload.screen (optional)"
         },
         "quotedMsgId": {
-          "type": "string"
+          "type": "string",
+          "description": "Quoted message ID (Cloud API)"
         },
         "chatId": {
-          "type": "string"
+          "type": "string",
+          "description": "Required if phone is not set. Chat ID from the message list. Examples: 12020721369@c.us or 120363046942338209@g.us(group)"
         },
         "phone": {
-          "type": "integer"
+          "type": "integer",
+          "description": "Required if chatId is not set. A phone number starting with the country code. USA example: 12020721369."
         }
       },
       "additionalProperties": false,
@@ -1149,6 +1613,14 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
       "type": "object",
       "properties": {
         "phone": {
+          "type": "string",
+          "description": "Recipient phone with country code. Use phone or chatId."
+        },
+        "chatId": {
+          "type": "string",
+          "description": "Recipient chat ID (`phone@c.us`, group `@g.us`, or BSUID `@lid`). Use phone or chatId."
+        },
+        "quotedMsgId": {
           "type": "string"
         },
         "body": {
@@ -1194,6 +1666,8 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
     },
     "inputFields": [
       "phone",
+      "chatId",
+      "quotedMsgId",
       "body",
       "buttonText",
       "action",
@@ -1203,30 +1677,37 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "send_location",
     "operationId": "sendLocation",
-    "description": "Send a Location",
+    "description": "Send a location to an existing chat. (Only if the dialogue has an Open Session). \nOnly one of two parameters is needed to determine the destination - chatId or phone.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
         "lat": {
-          "type": "string"
+          "type": "string",
+          "description": "Latitude of the location. Example: 45.018337"
         },
         "lng": {
-          "type": "string"
+          "type": "string",
+          "description": "Longitude of the location. Example: -73.968285"
         },
         "address": {
-          "type": "string"
+          "type": "string",
+          "description": "Address of the location. Only displayed if name is present. Example: 9766 Valley View St., New York, NY 10024"
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "Name of the location. Example: Facebook HQ"
         },
         "quotedMsgId": {
-          "type": "string"
+          "type": "string",
+          "description": "Quoted message ID (Cloud API)"
         },
         "chatId": {
-          "type": "string"
+          "type": "string",
+          "description": "Required if phone is not set. Chat ID from the message list. Examples: 12020721369@c.us or 120363046942338209@g.us(group)"
         },
         "phone": {
-          "type": "integer"
+          "type": "integer",
+          "description": "Required if chatId is not set. A phone number starting with the country code. USA example: 12020721369."
         }
       },
       "additionalProperties": false,
@@ -1253,6 +1734,14 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
       "type": "object",
       "properties": {
         "phone": {
+          "type": "string",
+          "description": "Recipient phone with country code. Use phone or chatId."
+        },
+        "chatId": {
+          "type": "string",
+          "description": "Recipient chat ID (`phone@c.us`, group `@g.us`, or BSUID `@lid`). Use phone or chatId."
+        },
+        "quotedMsgId": {
           "type": "string"
         },
         "body": {
@@ -1263,13 +1752,15 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
     },
     "inputFields": [
       "phone",
+      "chatId",
+      "quotedMsgId",
       "body"
     ]
   },
   {
     "name": "send_message",
     "operationId": "sendMessage",
-    "description": "Send a Message",
+    "description": "Send a message to an existing chat. (Only if the dialogue has an Open Session). \nThe message will be added to the queue for sending and delivered even if the phone \nis disconnected from the Internet or authorization is not passed.\n\nOnly one of two parameters is needed to determine the destination - chatId or phone.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1288,8 +1779,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
         },
         "chatId": {
           "type": "string",
-          "description": "Chat ID in format: phone@c.us (individual) or phone@g.us (group)",
-          "pattern": "^[0-9]+@[cg]\\.us$",
+          "description": "Recipient chat ID: phone@c.us, group@g.us, or BSUID@lid",
           "example": "12020721369@c.us"
         },
         "phone": {
@@ -1315,57 +1805,148 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "send_order_details",
     "operationId": "sendOrderDetails",
-    "description": "Send order details (India payments template)",
+    "description": "Send a WhatsApp **order details** payment / invoice message using a\npre-approved **Utility** template that has an `ORDER_DETAILS` button.\n\n**India only** (WhatsApp Payments India). Requires:\n- India WhatsApp Business number\n- Commerce enabled on the channel (`GET`/`POST /commerce`)\n- Approved template with an `ORDER_DETAILS` button\n\nUse this method when you need structured fields (`order`, `referenceId`,\n`currency`, `paymentSettings`). The API appends a template button\n`sub_type: order_details` and sends via the same path as `POST /sendTemplate`.\n\nWorks **outside the 24-hour session window** (template message).\n\nYou can also send the same payload yourself with `POST /sendTemplate` by\nincluding a button component in `params`:\n\n```json\n{\n  \"type\": \"button\",\n  \"sub_type\": \"order_details\",\n  \"index\": 0,\n  \"parameters\": [{\n    \"type\": \"action\",\n    \"action\": {\n      \"order_details\": {\n        \"reference_id\": \"order-123\",\n        \"currency\": \"INR\",\n        \"order\": { \"status\": \"pending\", \"items\": [], \"subtotal\": { \"offset\": 100, \"value\": 50000 } }\n      }\n    }\n  }]\n}\n```\n",
     "inputSchema": {
       "type": "object",
       "properties": {
         "phone": {
           "type": "integer",
-          "description": "Recipient phone (India E.164 digits, no +)"
+          "description": "Recipient phone (India E.164 digits, no +). Use phone or chatId.",
+          "example": 919876543210
         },
         "chatId": {
           "type": "string",
-          "description": "Recipient chatId (phone@c.us / bsuid@lid / …)"
+          "description": "Recipient chatId (e.g. phone@c.us). Use phone or chatId."
         },
         "template": {
           "type": "string",
-          "description": "Approved template name with ORDER_DETAILS button"
+          "description": "Approved Utility template name that includes an ORDER_DETAILS button",
+          "example": "order_details_utility"
         },
         "namespace": {
           "type": "string",
-          "description": "Template namespace"
+          "description": "Template namespace from the channel / template list",
+          "example": "your_namespace_uuid"
         },
         "language": {
           "type": "object",
-          "description": "Template language object, e.g. code \"en\" or policy \"deterministic\" with code \"en\".\n",
+          "description": "Template language",
+          "required": [
+            "code"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "description": "Language code",
+              "example": "en"
+            },
+            "policy": {
+              "type": "string",
+              "description": "Optional language policy",
+              "example": "deterministic"
+            }
+          },
           "additionalProperties": true
         },
         "params": {
           "type": "array",
-          "description": "Extra template components (header/body). An order_details button is appended automatically if missing.\n",
+          "description": "Extra template components (HEADER / BODY / etc.). If an order_details button is missing, the API appends one from order / referenceId / currency / paymentSettings.\n",
           "items": {
             "type": "object",
             "additionalProperties": true
           }
         },
-        "order": {
-          "type": "object",
-          "description": "Order object (items, subtotal, tax, shipping, discount, status) per Meta Payments India docs.\n",
-          "additionalProperties": true
-        },
         "referenceId": {
           "type": "string",
-          "description": "Unique order/payment reference id"
-        },
-        "paymentSettings": {
-          "type": "object",
-          "description": "Optional payment_settings (UPI / payment gateway / payment link).\n",
-          "additionalProperties": true
+          "description": "Unique order / payment reference id (maps to reference_id)",
+          "example": "order-123"
         },
         "currency": {
           "type": "string",
-          "description": "Currency code (INR for India)",
+          "description": "Currency code for India payments",
           "example": "INR"
+        },
+        "paymentSettings": {
+          "type": "object",
+          "description": "Optional payment settings (UPI / payment gateway / payment link). Forwarded as payment_settings on the order_details action.\n",
+          "additionalProperties": true
+        },
+        "order": {
+          "type": "object",
+          "description": "Order payload for the ORDER_DETAILS button. Typical fields: status, items[], subtotal, tax, shipping, discount. Amount objects use `{ \"offset\": 100, \"value\": <minor_units> }` (e.g. value 50000 with offset 100 = ₹500.00).\n",
+          "required": [
+            "items"
+          ],
+          "properties": {
+            "status": {
+              "type": "string",
+              "description": "Order status",
+              "example": "pending"
+            },
+            "items": {
+              "type": "array",
+              "description": "Line items",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "retailer_id": {
+                    "type": "string",
+                    "example": "SKU-1"
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "Item"
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "amount": {
+                    "type": "object",
+                    "properties": {
+                      "offset": {
+                        "type": "integer",
+                        "example": 100
+                      },
+                      "value": {
+                        "type": "integer",
+                        "example": 50000
+                      }
+                    },
+                    "additionalProperties": true
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "subtotal": {
+              "type": "object",
+              "properties": {
+                "offset": {
+                  "type": "integer",
+                  "example": 100
+                },
+                "value": {
+                  "type": "integer",
+                  "example": 50000
+                }
+              },
+              "additionalProperties": true
+            },
+            "tax": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "shipping": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "discount": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": true
         }
       },
       "additionalProperties": false,
@@ -1383,16 +1964,16 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
       "namespace",
       "language",
       "params",
-      "order",
       "referenceId",
+      "currency",
       "paymentSettings",
-      "currency"
+      "order"
     ]
   },
   {
     "name": "send_payment_request",
     "operationId": "sendPaymentRequest",
-    "description": "Send payment request (regional)",
+    "description": "Send a regional payment request interactive message (beta scaffold).\n`region` must be IN, SG, or BR. Payload shape follows Meta regional payments docs;\nverify on stage before production use. Full regional builders are not implemented yet.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1436,20 +2017,51 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "send_product",
     "operationId": "sendProduct",
-    "description": "Send a Product",
+    "description": "Send a single catalog product or a product list.\nDestination is `chatId` or `phone`. `action` is required:\n- single product: `{ \"catalog_id\": \"...\", \"product_retailer_id\": \"...\" }`\n- product list: `{ \"catalog_id\": \"...\", \"sections\": [{ \"title\": \"...\", \"product_items\": [{ \"product_retailer_id\": \"...\" }] }] }`\n",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "payload": {
+        "phone": {
+          "type": "string",
+          "description": "Recipient phone with country code. Use phone or chatId."
+        },
+        "chatId": {
+          "type": "string",
+          "description": "Recipient chat ID (`phone@c.us`, group `@g.us`, or BSUID `@lid`). Use phone or chatId."
+        },
+        "quotedMsgId": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string",
+          "description": "Optional message text shown with the product"
+        },
+        "footer": {
+          "type": "string"
+        },
+        "header": {
+          "type": "string",
+          "description": "Text header (product list only)"
+        },
+        "action": {
           "type": "object",
           "additionalProperties": true,
-          "description": "Request body payload"
+          "description": "Catalog action (`catalog_id` + `product_retailer_id`, or `sections` for a list)"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "required": [
+        "action"
+      ]
     },
     "inputFields": [
-      "payload"
+      "phone",
+      "chatId",
+      "quotedMsgId",
+      "body",
+      "footer",
+      "header",
+      "action"
     ]
   },
   {
@@ -1460,7 +2072,12 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
       "type": "object",
       "properties": {
         "phone": {
-          "type": "string"
+          "type": "string",
+          "description": "Recipient phone with country code. Use phone or chatId."
+        },
+        "chatId": {
+          "type": "string",
+          "description": "Recipient chat ID (`phone@c.us`, group `@g.us`, or BSUID `@lid`). Use phone or chatId."
         },
         "body": {
           "type": "string"
@@ -1473,6 +2090,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
     },
     "inputFields": [
       "phone",
+      "chatId",
       "body",
       "quotedMsgId"
     ]
@@ -1480,7 +2098,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "send_sticker",
     "operationId": "sendSticker",
-    "description": "Send sticker message",
+    "description": "Send a WhatsApp sticker by mediaId or link URL.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1515,33 +2133,54 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "send_template",
     "operationId": "sendTemplate",
-    "description": "Send Template Message",
+    "description": "Send a WhatsApp **template** message (works outside the 24-hour session window).\n\nUse this tool — not `send_message` — when the 24h session is closed.\n\n`params` MUST be Cloud API **component objects**, never a flat list of strings\nand never the old On-Prem `hsm` / `localizable_params` format.\n\nExample body variable `{{1}}`:\n\n```json\n{\n  \"type\": \"body\",\n  \"parameters\": [{ \"type\": \"text\", \"text\": \"Ivan\" }]\n}\n```\n\nDo not send `\"type\": \"hsm\"` and do not send `params: [\"Ivan\", \"123\"]`.\n\nSupported `params` button `sub_type` values include: `url`, `quick_reply`,\n`copy_code` / `coupon_code`, `catalog`, `flow`, `limited_time_offer`, and\n**`order_details`** (WhatsApp Payments **India only** — requires an approved\nUtility template with an ORDER_DETAILS button).\n\nConvenience wrapper with structured fields: `POST /sendOrderDetails`.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
         "template": {
-          "type": "string"
+          "type": "string",
+          "description": "Approved template name (template `name`, not the old HSM `element_name`)"
         },
         "language": {
           "type": "object",
+          "description": "Template language. Always set `policy` to `deterministic`.",
           "properties": {
             "policy": {
-              "type": "string"
+              "type": "string",
+              "description": "Must be `deterministic`",
+              "example": "deterministic",
+              "default": "deterministic"
             },
             "code": {
-              "type": "string"
+              "type": "string",
+              "example": "en"
             }
           }
         },
         "namespace": {
-          "type": "string"
+          "type": "string",
+          "description": "Template namespace from `list_templates`"
         },
         "params": {
           "type": "array",
-          "items": {}
+          "description": "Template components in WhatsApp Cloud API format.\nEach item is an object with `type` (`body`, `header`, `button`)\nand `parameters` (objects with `type` + `text` / media / action).\nNever a list of strings. Never HSM `localizable_params`.\n",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Component object, e.g. {\"type\":\"body\",\"parameters\":[{\"type\":\"text\",\"text\":\"Ivan\"}]} or a header/button/carousel component. Not a string.\n"
+          }
         },
         "phone": {
-          "type": "string"
+          "type": "string",
+          "description": "Recipient phone with country code (use phone or chatId)"
+        },
+        "chatId": {
+          "type": "string",
+          "description": "Recipient chat ID (`phone@c.us`, group `@g.us`, or BSUID `@lid`). Use phone or chatId."
+        },
+        "quotedMsgId": {
+          "type": "string",
+          "description": "Optional Cloud API wamid to quote"
         },
         "useMMlite": {
           "type": "boolean",
@@ -1564,6 +2203,8 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
       "namespace",
       "params",
       "phone",
+      "chatId",
+      "quotedMsgId",
       "useMMlite",
       "messageActivitySharing",
       "messageSendTtlSeconds"
@@ -1572,7 +2213,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "set_conversational_automation",
     "operationId": "setConversationalAutomation",
-    "description": "Set conversational automation settings",
+    "description": "Update WhatsApp conversational components.\n\nAllowed body fields (others are ignored):\n- `enable_welcome_message` (boolean)\n- `prompts` (string[], max 4, each ≤ 80 chars)\n- `commands` (`{ command_name, command_description }[]`)\n\nProxies Meta/360dialog `POST /conversational_automation`.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1624,7 +2265,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "set_webhook",
     "operationId": "setWebhook",
-    "description": "Set webhook URL",
+    "description": "Set the client webhook URL for inbound events.\n\n**Replaces** the stored webhook list with this single URL (it does not append).\nTo send to several endpoints, pass an array in `webhookUrl` or use `POST /settings`.\n\nWhatsApp **Calling** events (`field=calls`) are forwarded as passthrough\npayloads with `type: \"calls\"` and `instanceId` (connect / status / terminate).\nCall permission replies arrive on the normal messages path\n(`call_permission_reply`). Details: **Calling** tag.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1641,7 +2282,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "set_whatsapp_business_encryption",
     "operationId": "setWhatsappBusinessEncryption",
-    "description": "Set business encryption public key",
+    "description": "Upload and sign a 2048-bit RSA business public key (PEM) for this channel's phone number.\nMeta requires a signed key before Flow publish/send. Only one active key per number;\na new upload replaces the previous key.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1683,26 +2324,171 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "update_calling_settings",
     "operationId": "updateCallingSettings",
-    "description": "Update calling settings",
+    "description": "Enable, disable, or update WhatsApp Calling settings (beta).\n\nProxies upstream `POST /calling/settings`.\nBody is forwarded as-is (1msg does not validate fields).\n\n**Common fields under `calling`**\n- `status` (`ENABLED` | `DISABLED`) — required to turn calling on/off\n- `call_icon_visibility` (`DEFAULT` | `DISABLE_ALL`) — optional\n- `callback_permission_status` (`ENABLED` | `DISABLED`) — optional;\n  when enabled, inbound user calls grant callback permission\n- `call_hours` — optional hours / timezone object\n- `sip` — optional SIP trunk; when SIP is ENABLED, Graph call actions and\n  calling webhooks are not used\n- `srtp_key_exchange_protocol` (`DTLS` | `SDES`) — SDES only with SIP\n- `video.status` — optional\n\nMeta may accept only one feature group per request — prefer focused updates\n(e.g. enable status first, then SIP).\n\nTrial / `subscriptionBlocked` → **403** plain text.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "payload": {
+        "calling": {
           "type": "object",
-          "additionalProperties": true,
-          "description": "Request body payload"
+          "description": "Calling feature configuration for the business phone number",
+          "properties": {
+            "status": {
+              "type": "string",
+              "description": "Enable or disable Calling API on this number",
+              "enum": [
+                "ENABLED",
+                "DISABLED"
+              ],
+              "example": "ENABLED"
+            },
+            "call_icon_visibility": {
+              "type": "string",
+              "description": "Controls call icon visibility in the WhatsApp client",
+              "enum": [
+                "DEFAULT",
+                "DISABLE_ALL"
+              ],
+              "example": "DEFAULT"
+            },
+            "callback_permission_status": {
+              "type": "string",
+              "description": "When ENABLED, a user who calls your business automatically grants\ncall permission for business-initiated callbacks (subject to Meta rules).\n",
+              "enum": [
+                "ENABLED",
+                "DISABLED"
+              ],
+              "example": "ENABLED"
+            },
+            "srtp_key_exchange_protocol": {
+              "type": "string",
+              "description": "SRTP key exchange. DTLS is default/recommended.\nSDES is only valid when SIP signaling is enabled.\n",
+              "enum": [
+                "DTLS",
+                "SDES"
+              ],
+              "example": "DTLS"
+            },
+            "call_hours": {
+              "type": "object",
+              "description": "Optional call hours / timezone configuration (Meta shape)",
+              "additionalProperties": true,
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "ENABLED"
+                },
+                "timezone": {
+                  "type": "string",
+                  "example": "America/Los_Angeles"
+                },
+                "day_of_week_start": {
+                  "type": "string",
+                  "example": "MONDAY"
+                }
+              }
+            },
+            "sip": {
+              "type": "object",
+              "description": "SIP trunk settings. When SIP is ENABLED, Graph call actions and\ncalling webhooks are not used — Meta dials your SIP server directly.\n",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "ENABLED",
+                    "DISABLED"
+                  ],
+                  "example": "DISABLED"
+                },
+                "servers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "hostname": {
+                        "type": "string",
+                        "example": "sip.example.com"
+                      },
+                      "port": {
+                        "type": "integer",
+                        "example": 5061
+                      },
+                      "request_uri_user_params": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "string"
+                        }
+                      },
+                      "sip_user_password": {
+                        "type": "string",
+                        "description": "Present on GET when SIP credentials are returned by Meta"
+                      },
+                      "password": {
+                        "type": "string",
+                        "description": "Alternate password field name from some Meta responses"
+                      },
+                      "app_id": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": true
+                  }
+                }
+              },
+              "additionalProperties": true
+            },
+            "video": {
+              "type": "object",
+              "description": "Video calling toggle when supported",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "ENABLED",
+                    "DISABLED"
+                  ]
+                }
+              },
+              "additionalProperties": true
+            },
+            "audio": {
+              "type": "object",
+              "description": "Audio settings (typically response-only)",
+              "properties": {
+                "status": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": true
+            },
+            "restrictions": {
+              "type": "object",
+              "description": "Calling restrictions (response-only)",
+              "additionalProperties": true
+            },
+            "ip_addresses": {
+              "type": "object",
+              "description": "Meta media IP ranges (response-only)",
+              "additionalProperties": true
+            },
+            "call_icons": {
+              "type": "object",
+              "description": "Call icon country restrictions (response-only)",
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": true
         }
       },
       "additionalProperties": false
     },
     "inputFields": [
-      "payload"
+      "calling"
     ]
   },
   {
     "name": "update_me",
     "operationId": "updateMe",
-    "description": "Update profile info",
+    "description": "Update WhatsApp Business Account profile fields. At least one of\nabout, description, email, photo, address, vertical, websites is required.\nBlocked when the channel subscription limit is exceeded.\n",
     "inputSchema": {
       "type": "object",
       "properties": {

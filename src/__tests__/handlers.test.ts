@@ -11,6 +11,13 @@ function createMockClient(): ChatApiClient {
     },
     messaging: {
       listMessages: jest.fn().mockResolvedValue({ messages: [] }),
+      sendContact: jest.fn().mockResolvedValue({ sent: true }),
+      sendCarousel: jest.fn().mockResolvedValue({ sent: true }),
+      createUploadMedia: jest.fn().mockResolvedValue({ mediaId: '123' }),
+    },
+    channel: {
+      listSettings: jest.fn().mockResolvedValue({ webhookUrl: [] }),
+      createSettings: jest.fn().mockResolvedValue({ success: true }),
     },
     templates: {
       listTemplates: jest.fn().mockResolvedValue({ templates: [] }),
@@ -48,13 +55,97 @@ describe('invokeGeneratedTool', () => {
 
     await invokeGeneratedTool(client, 'list_templates', {});
 
-    expect(client.templates.listTemplates).toHaveBeenCalledWith('test-api-token');
+    expect(client.templates.listTemplates).toHaveBeenCalledWith(
+      'test-api-token',
+      undefined,
+      undefined,
+      undefined,
+    );
+  });
+
+  it('wraps send_contact.contact into contacts[] so the published SDK keeps the card', async () => {
+    const client = createMockClient();
+
+    await invokeGeneratedTool(client, 'send_contact', {
+      phone: '79181976551',
+      contact: { name: 'Lida', phone: '+79181976551' },
+    });
+
+    expect(client.messaging.sendContact).toHaveBeenCalledWith(
+      'test-api-token',
+      expect.objectContaining({
+        phone: '79181976551',
+        contacts: [
+          expect.objectContaining({
+            name: { formatted_name: 'Lida', first_name: 'Lida' },
+            phones: [{ phone: '+79181976551', type: 'CELL' }],
+          }),
+        ],
+      }),
+    );
+    expect((client.messaging.sendContact as jest.Mock).mock.calls[0][1]).not.toHaveProperty(
+      'contact',
+    );
+  });
+
+  it('wraps send_carousel.cards into params', async () => {
+    const client = createMockClient();
+    const cards = [{ body: 'one' }, { body: 'two' }];
+
+    await invokeGeneratedTool(client, 'send_carousel', {
+      phone: '79181976551',
+      cards,
+    });
+
+    expect(client.messaging.sendCarousel).toHaveBeenCalledWith(
+      'test-api-token',
+      [{ type: 'CAROUSEL', cards }],
+      undefined,
+      undefined,
+      undefined,
+      79181976551,
+    );
+  });
+
+  it('maps create_upload_media.url onto body', async () => {
+    const client = createMockClient();
+
+    await invokeGeneratedTool(client, 'create_upload_media', {
+      url: 'https://example.com/file.pdf',
+    });
+
+    expect(client.messaging.createUploadMedia).toHaveBeenCalledWith(
+      'test-api-token',
+      expect.objectContaining({
+        body: 'https://example.com/file.pdf',
+        url: 'https://example.com/file.pdf',
+      }),
+    );
+  });
+
+  it('delegates list_settings and create_settings to channel', async () => {
+    const client = createMockClient();
+
+    await invokeGeneratedTool(client, 'list_settings', {});
+    expect((client.channel as unknown as { listSettings: jest.Mock }).listSettings).toHaveBeenCalledWith(
+      'test-api-token',
+    );
+
+    await invokeGeneratedTool(client, 'create_settings', {
+      webhookUrl: 'https://example.com/hook',
+    });
+    expect(
+      (client.channel as unknown as { createSettings: jest.Mock }).createSettings,
+    ).toHaveBeenCalledWith(
+      'test-api-token',
+      expect.objectContaining({ webhookUrl: 'https://example.com/hook' }),
+    );
   });
 });
 
 describe('GENERATED_MCP_TOOLS', () => {
-  it('exposes 35 public API tools including send_message', () => {
-    expect(GENERATED_MCP_TOOLS).toHaveLength(60);
+  it('exposes 62 public API tools including send_message', () => {
+    expect(GENERATED_MCP_TOOLS).toHaveLength(62);
 
     const sendMessage = GENERATED_MCP_TOOLS.find((tool) => tool.name === 'send_message');
     expect(sendMessage).toBeDefined();

@@ -1,6 +1,6 @@
 # @1msg/mcp
 
-MCP server for the [1MSG](https://1msg.io) WhatsApp Business API — **60 public tools** for Cursor, Claude Desktop, and other [MCP](https://modelcontextprotocol.io/) clients.
+MCP server for the [1MSG](https://1msg.io) WhatsApp Business API — **62 public tools** for Cursor, Claude Desktop, and other [MCP](https://modelcontextprotocol.io/) clients.
 
 Transports: **stdio** (local) and **Streamable HTTP** (Cloud).
 
@@ -35,7 +35,6 @@ npx -y @1msg/mcp
 
 For **test channels**, set `ONE_MSG_BASE_URL=https://sandbox.1msg.io` (bare `sandbox.1msg.io` is also accepted).
 
-Deprecated aliases still work: `CHAT_API_BASE_URL`, `CHAT_API_TOKEN`, `CHAT_API_INSTANCE_ID`.
 
 ### Clone and run
 
@@ -137,7 +136,7 @@ docker run --rm -p 3100:3100 \
 |--------|---------|
 | `npm run build` | Compile TypeScript → `dist/` |
 | `npm test` | Jest unit tests |
-| `npm run smoke:tools-list` | Stdio `tools/list` smoke (expects 60 tools; uses dummy token) |
+| `npm run smoke:tools-list` | Stdio `tools/list` smoke (expects 62 tools; uses dummy token) |
 | `npm start` / `npm run start:http` | Run stdio / HTTP servers |
 
 ## Architecture

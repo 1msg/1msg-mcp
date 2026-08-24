@@ -72,7 +72,7 @@ describe('createMcpServer tools/list', () => {
     const tools = await client.listTools();
     const names = tools.tools.map((tool) => tool.name).sort();
 
-    expect(tools.tools).toHaveLength(60);
+    expect(tools.tools).toHaveLength(62);
     expect(names).toContain('send_message');
     expect(names).toContain('get_me');
     expect(names).toContain('list_templates');

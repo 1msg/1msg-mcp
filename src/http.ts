@@ -28,7 +28,7 @@ const { createMcpExpressApp } = require('@modelcontextprotocol/sdk/server/expres
 };
 
 const PACKAGE_NAME = '@1msg/mcp';
-const VERSION = '1.2.1';
+const VERSION = '1.2.2';
 
 interface SessionEntry {
   transport: StreamableHTTPServerTransportType;
@@ -62,7 +62,7 @@ function loadHttpOptionsFromEnv(): HttpServerOptions {
     process.env.CHAT_API_URL?.trim();
   if (!baseUrl) {
     throw new Error(
-      'ONE_MSG_BASE_URL (or deprecated CHAT_API_BASE_URL) is required for HTTP mode (fixed upstream API root).',
+      'ONE_MSG_BASE_URL is required for HTTP mode (fixed upstream API root).',
     );
   }
 
@@ -316,7 +316,7 @@ function printUsage(): void {
     '  node dist/http.js [--help]',
     '',
     'Environment:',
-    '  ONE_MSG_BASE_URL     Default upstream API root (required; alias CHAT_API_BASE_URL)',
+    '  ONE_MSG_BASE_URL     Default upstream API root (required)',
     '                        Live: https://api.1msg.io  Test: https://sandbox.1msg.io',
     '  MCP_HTTP_PORT         Listen port (default 3100)',
     '  MCP_HTTP_HOST         Bind address (default 0.0.0.0)',
