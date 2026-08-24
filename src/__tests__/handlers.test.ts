@@ -14,6 +14,7 @@ function createMockClient(): ChatApiClient {
       sendContact: jest.fn().mockResolvedValue({ sent: true }),
       sendCarousel: jest.fn().mockResolvedValue({ sent: true }),
       createUploadMedia: jest.fn().mockResolvedValue({ mediaId: '123' }),
+      deleteMedia: jest.fn().mockResolvedValue({ result: 'success' }),
     },
     channel: {
       listSettings: jest.fn().mockResolvedValue({ webhookUrl: [] }),
@@ -154,6 +155,15 @@ describe('invokeGeneratedTool', () => {
         guaranteedHooks: true,
       }),
     );
+  });
+
+  it('calls delete_media as deleteMedia(token, mediaId)', async () => {
+    const client = createMockClient();
+
+    await invokeGeneratedTool(client, 'delete_media', { mediaId: '1597399065095084' });
+    expect(
+      (client.messaging as unknown as { deleteMedia: jest.Mock }).deleteMedia,
+    ).toHaveBeenCalledWith('test-api-token', '1597399065095084');
   });
 });
 

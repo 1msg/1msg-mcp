@@ -460,8 +460,11 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
       "type": "object",
       "properties": {
         "mediaId": {
-          "type": "string",
-          "description": "Numeric WABA media id"
+          "oneOf": [
+            { "type": "string" },
+            { "type": "integer" }
+          ],
+          "description": "Numeric WABA media id (string or number)"
         }
       },
       "additionalProperties": false,

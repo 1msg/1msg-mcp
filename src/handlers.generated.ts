@@ -218,7 +218,7 @@ export async function invokeGeneratedTool(
     case 'delete_media': {
       const token = client.config.token;
       const mediaId = requireArg(args, 'mediaId');
-      return client.messaging.deleteMedia(mediaId, token);
+      return client.messaging.deleteMedia(token, mediaId);
     }
 
     case 'delete_media_legacy': {

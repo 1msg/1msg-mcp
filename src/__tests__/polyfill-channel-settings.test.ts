@@ -107,4 +107,23 @@ describe('polyfillChannelSettings', () => {
       guaranteedHooks: true,
     });
   });
+
+  it('DELETEs /media/{id} even if SDK deleteMedia argument order is swapped', async () => {
+    const client = {
+      config: { buildRequestUrl: (path: string) => `https://api.test${path}` },
+      messaging: {
+        deleteMedia: jest.fn(),
+      },
+    };
+    polyfillChannelSettings(client);
+
+    await (
+      client.messaging as {
+        deleteMedia: (first: string, second?: string) => Promise<unknown>;
+      }
+    ).deleteMedia('1597399065095084', 'tok');
+
+    expect(calls[0]?.url).toBe('https://api.test/media/1597399065095084');
+    expect(calls[0]?.init?.method).toBe('DELETE');
+  });
 });

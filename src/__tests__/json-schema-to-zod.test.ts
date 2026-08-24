@@ -17,4 +17,17 @@ describe('jsonSchemaToZod', () => {
       ).webhookUrl,
     ).toEqual(['https://hooks.example/a', 'https://hooks.example/b']);
   });
+
+  it('accepts delete_media mediaId as a number or a string', () => {
+    const deleteMedia = GENERATED_MCP_TOOLS.find((tool) => tool.name === 'delete_media');
+    expect(deleteMedia).toBeDefined();
+    const schema = jsonSchemaToZod(deleteMedia!.inputSchema);
+    expect((schema.parse({ mediaId: '1597399065095084' }) as { mediaId: string }).mediaId).toBe(
+      '1597399065095084',
+    );
+    const fromNumber = (
+      schema.parse({ mediaId: 1597399065095084 }) as { mediaId: string | number }
+    ).mediaId;
+    expect(String(fromNumber)).toBe('1597399065095084');
+  });
 });

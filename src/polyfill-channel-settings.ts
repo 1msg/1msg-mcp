@@ -15,6 +15,19 @@ async function readJson(response: Response): Promise<unknown> {
   return response.json();
 }
 
+function pickNumericMediaId(first: unknown, second?: unknown): string {
+  for (const value of [first, second]) {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      const asInt = String(Math.trunc(value));
+      if (/^\d+$/.test(asInt)) return asInt;
+    }
+    if (typeof value === 'string' && /^\d+$/.test(value.trim())) {
+      return value.trim();
+    }
+  }
+  throw new Error('mediaId must be a numeric WABA media id');
+}
+
 async function postJsonSafe(
   buildUrl: (path: string) => string,
   path: string,
@@ -153,6 +166,7 @@ export function polyfillChannelSettings(client: ChannelSettingsClient): void {
   }
   const messaging = client.messaging as {
     createUploadMedia?: (token: string, body?: unknown) => Promise<unknown>;
+    deleteMedia?: (tokenOrMediaId: string, mediaIdOrToken?: string) => Promise<unknown>;
     sendContact?: (token: string, body?: unknown) => Promise<unknown>;
     sendCarousel?: (
       token: string,
@@ -162,6 +176,18 @@ export function polyfillChannelSettings(client: ChannelSettingsClient): void {
       chatId?: unknown,
       phone?: unknown,
     ) => Promise<unknown>;
+  };
+
+  messaging.deleteMedia = async (first: string, second?: string) => {
+    const mediaId = pickNumericMediaId(first, second);
+    const response = await fetch(buildUrl(`/media/${encodeURIComponent(mediaId)}`), {
+      method: 'DELETE',
+    });
+    if (response.ok) {
+      const text = await response.text();
+      return text ? JSON.parse(text) : { result: 'success' };
+    }
+    return postJsonSafe(buildUrl, '/deleteMedia', { mediaId });
   };
 
   messaging.createUploadMedia = async (_token: string, body?: unknown) => {
