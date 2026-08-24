@@ -87,7 +87,7 @@ describe('createMcpServer tools/call', () => {
     });
 
     expect(mock.listMessages).toHaveBeenCalledTimes(1);
-    expect(mock.listMessages).toHaveBeenCalledWith('test-token');
+    expect(mock.listMessages.mock.calls[0][0]).toBe('test-token');
     expect(result.isError).toBeFalsy();
     const text = (result.content as Array<{ text: string }>)[0].text;
     expect(text).toContain('msg-1');
