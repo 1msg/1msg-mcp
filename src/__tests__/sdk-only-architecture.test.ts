@@ -53,18 +53,21 @@ describe('MCP SDK-only architecture', () => {
   it('HTTP protocol host still delegates Chat API to SDK (no axios/fetch)', () => {
     for (const file of PROTOCOL_SERVER_FILES) {
       const content = fs.readFileSync(path.join(MCP_SRC, file), 'utf8');
-      expect(content).toContain('ChatApiClient');
+      expect(content).toContain("from '@1msg/sdk'");
+      expect(content).toContain('new Client(');
       expect(content).toContain('createMcpServer');
+      expect(content).not.toContain('ChatApiClient');
       expect(content).not.toMatch(/\bfrom\s+['"]axios['"]/);
       expect(content).not.toMatch(/\bfetch\s*\(/);
     }
   });
 
-  it('generated handlers delegate to ChatApiClient only', () => {
+  it('generated handlers delegate to Client only', () => {
     const handlersPath = path.join(MCP_SRC, 'handlers.generated.ts');
     const content = fs.readFileSync(handlersPath, 'utf8');
 
-    expect(content).toContain('ChatApiClient');
+    expect(content).toMatch(/import type \{ Client \} from '@1msg\/sdk'/);
+    expect(content).not.toContain('ChatApiClient');
     expect(content).toMatch(/client\.(messaging|profile|groups|flows|templates)\./);
     expect(content).toMatch(/client\.sendMessage\(/);
 
@@ -76,7 +79,8 @@ describe('MCP SDK-only architecture', () => {
   it('server wires tools through invokeGeneratedTool(client, ...)', () => {
     const content = fs.readFileSync(path.join(MCP_SRC, 'server.ts'), 'utf8');
     expect(content).toContain('invokeGeneratedTool');
-    expect(content).toContain('ChatApiClient');
+    expect(content).toContain('new Client(');
+    expect(content).not.toContain('ChatApiClient');
     expect(content).not.toMatch(/\bfetch\s*\(/);
   });
 });

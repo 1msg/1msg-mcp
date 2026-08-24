@@ -4,9 +4,9 @@ import { createHash, randomUUID } from 'node:crypto';
 import type { Request, Response } from 'express';
 import type { McpServer as McpServerType } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { StreamableHTTPServerTransport as StreamableHTTPServerTransportType } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { ChatApiClient } from '@1msg/sdk';
+import { Client } from '@1msg/sdk';
 import { McpAuthError, resolveRequestConfig } from './auth';
-import { normalizeBaseUrl, toChatApiConfig } from './config';
+import { normalizeBaseUrl, toClientConfig } from './config';
 import { hashIdentifier, logRequest } from './logging';
 import { RateLimiter, rateLimitKeyFromToken } from './rate-limit';
 import { createMcpServer } from './server';
@@ -28,7 +28,7 @@ const { createMcpExpressApp } = require('@modelcontextprotocol/sdk/server/expres
 };
 
 const PACKAGE_NAME = '@1msg/mcp';
-const VERSION = '1.2.7';
+const VERSION = '1.2.8';
 
 interface SessionEntry {
   transport: StreamableHTTPServerTransportType;
@@ -184,7 +184,7 @@ export function createHttpApp(options: HttpServerOptions): import('express').Exp
           return;
         }
       } else if (req.method === 'POST' && isInitializeRequest(req.body)) {
-        const client = new ChatApiClient(toChatApiConfig(credentials));
+        const client = new Client(toClientConfig(credentials));
         const server = createMcpServer(client);
         const transport = new StreamableHTTPServerTransport({
           sessionIdGenerator: () => randomUUID(),
@@ -237,7 +237,7 @@ export function createHttpApp(options: HttpServerOptions): import('express').Exp
       } else {
         // DNS RR across 3 prod LBs: session lives in one process. Recreate a
         // stateless transport so tools/call still works on a different LB.
-        const client = new ChatApiClient(toChatApiConfig(credentials));
+        const client = new Client(toClientConfig(credentials));
         const server = createMcpServer(client);
         const transport = new StreamableHTTPServerTransport({
           sessionIdGenerator: undefined,

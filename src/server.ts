@@ -1,8 +1,8 @@
 import type { McpServer as McpServerType } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { StdioServerTransport as StdioServerTransportType } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { ChatApiClient } from '@1msg/sdk';
+import { Client } from '@1msg/sdk';
 import type { McpServerConfig } from './config';
-import { toChatApiConfig } from './config';
+import { toClientConfig } from './config';
 import { invokeGeneratedTool } from './handlers.generated';
 import { GENERATED_MCP_TOOLS } from './tools.generated';
 import { jsonSchemaToZod } from './json-schema-to-zod';
@@ -19,7 +19,7 @@ const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio
 };
 
 const SERVER_NAME = '@1msg/mcp';
-const SERVER_VERSION = '1.2.7';
+const SERVER_VERSION = '1.2.8';
 
 function serializeToolResult(result: unknown): string {
   if (typeof result === 'string') {
@@ -62,7 +62,7 @@ function formatToolError(error: unknown): string {
 }
 
 /** Create MCP server with all generated Chat API tools. */
-export function createMcpServer(client: ChatApiClient): McpServerType {
+export function createMcpServer(client: Client): McpServerType {
   polyfillChannelSettings(client);
   const server = new McpServer({
     name: SERVER_NAME,
@@ -111,7 +111,7 @@ export function createMcpServer(client: ChatApiClient): McpServerType {
 
 /** Start MCP stdio server using SDK client derived from env config. */
 export async function startMcpServer(config: McpServerConfig): Promise<McpServerType> {
-  const client = new ChatApiClient(toChatApiConfig(config));
+  const client = new Client(toClientConfig(config));
   const server = createMcpServer(client);
   const transport = new StdioServerTransport();
   await server.connect(transport);

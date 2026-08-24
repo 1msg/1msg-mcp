@@ -1,6 +1,6 @@
-import { ChatApiConfig, type ChatApiConfigOptions } from '@1msg/sdk';
+import { ClientConfig, type ClientConfigOptions } from '@1msg/sdk';
 
-export interface McpServerConfig extends ChatApiConfigOptions {
+export interface McpServerConfig extends ClientConfigOptions {
   baseUrl: string;
   instanceId: string;
   token: string;
@@ -137,9 +137,9 @@ export function loadMcpConfig(): McpServerConfig {
   };
 }
 
-/** Build SDK ChatApiConfig from MCP env config. */
-export function toChatApiConfig(config: McpServerConfig): ChatApiConfig {
-  return new ChatApiConfig({
+/** Build SDK ClientConfig from MCP env config. */
+export function toClientConfig(config: McpServerConfig): ClientConfig {
+  return new ClientConfig({
     baseUrl: config.baseUrl,
     instanceId: config.instanceId,
     token: config.token,

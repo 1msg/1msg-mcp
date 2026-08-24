@@ -1,8 +1,8 @@
-import type { ChatApiClient } from '@1msg/sdk';
+import type { Client } from '@1msg/sdk';
 import { invokeGeneratedTool } from '../handlers.generated';
 import { GENERATED_MCP_TOOLS } from '../tools.generated';
 
-function createMockClient(): ChatApiClient {
+function createMockClient(): Client {
   return {
     config: { token: 'test-api-token' },
     sendMessage: jest.fn().mockResolvedValue({ sent: true, id: 'msg-1' }),
@@ -23,7 +23,7 @@ function createMockClient(): ChatApiClient {
     templates: {
       listTemplates: jest.fn().mockResolvedValue({ templates: [] }),
     },
-  } as unknown as ChatApiClient;
+  } as unknown as Client;
 }
 
 describe('invokeGeneratedTool', () => {

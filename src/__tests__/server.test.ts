@@ -1,4 +1,4 @@
-import type { ChatApiClient } from '@1msg/sdk';
+import type { Client as SdkClient } from '@1msg/sdk';
 import { createMcpServer } from '../server';
 
 // CJS subpath exports from @modelcontextprotocol/sdk
@@ -11,7 +11,7 @@ const { InMemoryTransport } = require('@modelcontextprotocol/sdk/inMemory.js') a
   InMemoryTransport: typeof import('@modelcontextprotocol/sdk/inMemory.js').InMemoryTransport;
 };
 
-function createMockClient(): ChatApiClient {
+function createMockClient(): SdkClient {
   return {
     config: { token: 'test-api-token' },
     sendMessage: jest.fn().mockResolvedValue({ sent: true, id: 'msg-1' }),
@@ -57,7 +57,7 @@ function createMockClient(): ChatApiClient {
       listTemplates: jest.fn().mockResolvedValue({ templates: [] }),
       sendTemplate: jest.fn(),
     },
-  } as unknown as ChatApiClient;
+  } as unknown as SdkClient;
 }
 
 describe('createMcpServer tools/list', () => {

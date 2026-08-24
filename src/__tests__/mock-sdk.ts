@@ -1,4 +1,4 @@
-import { ChatApiConfig, type ChatApiClient } from '@1msg/sdk';
+import { ClientConfig, type Client } from '@1msg/sdk';
 
 export interface MockChatApiClientMocks {
   sendMessage: jest.Mock;
@@ -7,12 +7,12 @@ export interface MockChatApiClientMocks {
 }
 
 export interface MockChatApiClientBundle extends MockChatApiClientMocks {
-  client: ChatApiClient;
+  client: Client;
 }
 
-/** Jest mock ChatApiClient with call tracking for MCP integration tests. */
+/** Jest mock Client with call tracking for MCP integration tests. */
 export function createMockChatApiClient(): MockChatApiClientBundle {
-  const config = new ChatApiConfig({
+  const config = new ClientConfig({
     baseUrl: 'https://api.1msg.io',
     instanceId: 'TEST_INSTANCE',
     token: 'test-token',
@@ -45,7 +45,7 @@ export function createMockChatApiClient(): MockChatApiClientBundle {
     flows: {},
     groups: {},
     templates: {},
-  } as unknown as ChatApiClient;
+  } as unknown as Client;
 
   return { client, sendMessage, getMe, listMessages };
 }
