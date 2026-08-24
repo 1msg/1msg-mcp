@@ -28,7 +28,7 @@ const { createMcpExpressApp } = require('@modelcontextprotocol/sdk/server/expres
 };
 
 const PACKAGE_NAME = '@1msg/mcp';
-const VERSION = '1.2.2';
+const VERSION = '1.2.4';
 
 interface SessionEntry {
   transport: StreamableHTTPServerTransportType;
@@ -235,7 +235,29 @@ export function createHttpApp(options: HttpServerOptions): import('express').Exp
         );
         return;
       } else {
-        sendJson(res, 404, mcpError(-32001, 'Unknown or expired MCP session.'));
+        // DNS RR across 3 prod LBs: session lives in one process. Recreate a
+        // stateless transport so tools/call still works on a different LB.
+        const client = new ChatApiClient(toChatApiConfig(credentials));
+        const server = createMcpServer(client);
+        const transport = new StreamableHTTPServerTransport({
+          sessionIdGenerator: undefined,
+        });
+        await server.connect(transport);
+        const closeFailover = () => {
+          void transport.close();
+        };
+        res.on('finish', closeFailover);
+        res.on('close', closeFailover);
+        await transport.handleRequest(req, res, req.body);
+        logRequest({
+          requestId,
+          method: req.method,
+          path: req.path,
+          status: res.statusCode,
+          instanceIdHash: hashIdentifier(credentials.instanceId),
+          latencyMs: Date.now() - started,
+          event: 'mcp_session_failover',
+        });
         return;
       }
 
