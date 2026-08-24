@@ -82,4 +82,29 @@ describe('polyfillChannelSettings', () => {
       cards,
     });
   });
+
+  it('POSTs create_settings webhookUrl array as JSON even if SDK method exists', async () => {
+    const original = jest.fn();
+    const client = {
+      config: { buildRequestUrl: (path: string) => `https://api.test${path}` },
+      channel: {
+        createSettings: original,
+      },
+    };
+    polyfillChannelSettings(client);
+
+    const urls = ['https://a.test/hook', 'https://b.test/hook'];
+    await (
+      client.channel as {
+        createSettings: (token: string, body: unknown) => Promise<unknown>;
+      }
+    ).createSettings('tok', { webhookUrl: urls, guaranteedHooks: true });
+
+    expect(original).not.toHaveBeenCalled();
+    expect(calls[0]?.url).toBe('https://api.test/settings');
+    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({
+      webhookUrl: urls,
+      guaranteedHooks: true,
+    });
+  });
 });

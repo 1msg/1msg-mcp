@@ -140,6 +140,20 @@ describe('invokeGeneratedTool', () => {
       'test-api-token',
       expect.objectContaining({ webhookUrl: 'https://example.com/hook' }),
     );
+
+    await invokeGeneratedTool(client, 'create_settings', {
+      webhookUrl: ['https://a.example/hook', 'https://b.example/hook'],
+      guaranteedHooks: true,
+    });
+    expect(
+      (client.channel as unknown as { createSettings: jest.Mock }).createSettings,
+    ).toHaveBeenCalledWith(
+      'test-api-token',
+      expect.objectContaining({
+        webhookUrl: ['https://a.example/hook', 'https://b.example/hook'],
+        guaranteedHooks: true,
+      }),
+    );
   });
 });
 

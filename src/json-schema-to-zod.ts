@@ -1,6 +1,17 @@
 import { z } from 'zod';
 import type { JsonSchema } from './tools.generated';
 
+function unionFromSchemas(schemas: JsonSchema[]): z.ZodTypeAny {
+  const parts = schemas.map((item) => jsonPropertyToZod(item));
+  if (parts.length === 0) {
+    return z.unknown();
+  }
+  if (parts.length === 1) {
+    return parts[0];
+  }
+  return z.union(parts as [z.ZodTypeAny, z.ZodTypeAny, ...z.ZodTypeAny[]]);
+}
+
 function jsonPropertyToZod(schema: JsonSchema): z.ZodTypeAny {
   if (schema.enum && schema.enum.length > 0) {
     const values = schema.enum.filter((value): value is string | number => {
@@ -9,6 +20,15 @@ function jsonPropertyToZod(schema: JsonSchema): z.ZodTypeAny {
     if (values.length > 0) {
       return z.union(values.map((value) => z.literal(value)) as [z.ZodLiteral<string | number>, ...z.ZodLiteral<string | number>[]]);
     }
+  }
+
+  const alternatives = schema.oneOf ?? (schema.anyOf as JsonSchema[] | undefined);
+  if (alternatives && alternatives.length > 0) {
+    return unionFromSchemas(alternatives);
+  }
+
+  if (Array.isArray(schema.type) && schema.type.length > 1) {
+    return unionFromSchemas(schema.type.map((type) => ({ type, items: schema.items })));
   }
 
   const type = Array.isArray(schema.type) ? schema.type[0] : schema.type;

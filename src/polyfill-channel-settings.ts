@@ -2,6 +2,7 @@ type ChannelSettingsClient = {
   config: { buildRequestUrl?: (path: string) => string };
   channel?: object;
   messaging?: object;
+  webhooks?: object;
 };
 
 async function readJson(response: Response): Promise<unknown> {
@@ -132,11 +133,20 @@ export function polyfillChannelSettings(client: ChannelSettingsClient): void {
     };
   }
 
-  if (typeof channel.createSettings !== 'function') {
-    channel.createSettings = async (_token: string, settings?: unknown) => {
-      return postJsonSafe(buildUrl, '/settings', settings);
-    };
+  // Always POST raw JSON so webhookUrl arrays survive published SDK ToJSON.
+  channel.createSettings = async (_token: string, settings?: unknown) => {
+    return postJsonSafe(buildUrl, '/settings', settings);
+  };
+
+  if (!client.webhooks) {
+    client.webhooks = {};
   }
+  const webhooks = client.webhooks as {
+    setWebhook?: (token: string, body?: unknown) => Promise<unknown>;
+  };
+  webhooks.setWebhook = async (_token: string, body?: unknown) => {
+    return postJsonSafe(buildUrl, '/webhook', body);
+  };
 
   if (!client.messaging) {
     client.messaging = {};

@@ -2270,7 +2270,18 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
       "type": "object",
       "properties": {
         "webhookUrl": {
-          "type": "string"
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ],
+          "description": "Replacement webhook URL, or array of URLs (max 5)"
         }
       },
       "additionalProperties": false
