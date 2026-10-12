@@ -46,14 +46,14 @@ import {
 
 export interface AddTemplateOperationRequest {
     token: string;
-    addTemplateRequest?: AddTemplateRequest;
+    addTemplateRequest?: (AddTemplateRequest) | undefined;
 }
 
 export interface ListTemplatesRequest {
     token: string;
-    limit?: number;
-    offset?: number;
-    sort?: ListTemplatesSortEnum;
+    limit?: (number) | undefined;
+    offset?: (number) | undefined;
+    sort?: (ListTemplatesSortEnum) | undefined;
 }
 
 export interface RemoveTemplateOperationRequest {
@@ -63,7 +63,7 @@ export interface RemoveTemplateOperationRequest {
 
 export interface SendTemplateOperationRequest {
     token: string;
-    sendTemplateRequest?: SendTemplateRequest;
+    sendTemplateRequest?: (SendTemplateRequest) | undefined;
 }
 
 /**

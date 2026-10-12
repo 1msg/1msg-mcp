@@ -77,37 +77,37 @@ import {
 export interface CreateFlowsOperationRequest {
     token: string;
     createFlowsRequest: CreateFlowsRequest;
-    wabaAccountId?: string;
+    wabaAccountId?: (string) | undefined;
 }
 
 export interface CreateFlowsFlowIdDeprecateRequest {
     flowId: string;
     token: string;
-    wabaAccountId?: string;
+    wabaAccountId?: (string) | undefined;
 }
 
 export interface CreateFlowsFlowIdPublishRequest {
     flowId: string;
     token: string;
-    wabaAccountId?: string;
+    wabaAccountId?: (string) | undefined;
 }
 
 export interface DeleteFlowsFlowIdRequest {
     flowId: string;
     token: string;
-    wabaAccountId?: string;
+    wabaAccountId?: (string) | undefined;
 }
 
 export interface GetFlowsFlowIdRequest {
     flowId: string;
     token: string;
-    wabaAccountId?: string;
+    wabaAccountId?: (string) | undefined;
 }
 
 export interface GetFlowsFlowIdPreviewRequest {
     flowId: string;
     token: string;
-    wabaAccountId?: string;
+    wabaAccountId?: (string) | undefined;
 }
 
 export interface GetWhatsappBusinessEncryptionRequest {
@@ -116,22 +116,22 @@ export interface GetWhatsappBusinessEncryptionRequest {
 
 export interface ListFlowsRequest {
     token: string;
-    wabaAccountId?: string;
-    fields?: string;
+    wabaAccountId?: (string) | undefined;
+    fields?: (string) | undefined;
 }
 
 export interface PatchFlowsFlowIdAssetsOperationRequest {
     flowId: string;
     token: string;
     patchFlowsFlowIdAssetsRequest: PatchFlowsFlowIdAssetsRequest;
-    wabaAccountId?: string;
+    wabaAccountId?: (string) | undefined;
 }
 
 export interface PatchFlowsFlowIdMetadataOperationRequest {
     flowId: string;
     token: string;
     patchFlowsFlowIdMetadataRequest: PatchFlowsFlowIdMetadataRequest;
-    wabaAccountId?: string;
+    wabaAccountId?: (string) | undefined;
 }
 
 export interface SetWhatsappBusinessEncryptionOperationRequest {

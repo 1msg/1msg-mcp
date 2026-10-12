@@ -132,9 +132,9 @@ import {
 
 export interface CreateReadMessageRequest {
     token: string;
-    messageId?: string;
-    msgId?: string;
-    typingIndicator?: boolean;
+    messageId?: (string) | undefined;
+    msgId?: (string) | undefined;
+    typingIndicator?: (boolean) | undefined;
 }
 
 export interface CreateUploadMediaOperationRequest {
@@ -158,14 +158,14 @@ export interface GetMmLiteStatusRequest {
 
 export interface ListMessagesRequest {
     token: string;
-    chatId?: string;
-    limit?: number;
-    last?: boolean;
-    lastMessageNumber?: number;
-    firstMessageNumber?: number;
-    minTime?: number;
-    maxTime?: number;
-    msgId?: string;
+    chatId?: (string) | undefined;
+    limit?: (number) | undefined;
+    last?: (boolean) | undefined;
+    lastMessageNumber?: (number) | undefined;
+    firstMessageNumber?: (number) | undefined;
+    minTime?: (number) | undefined;
+    maxTime?: (number) | undefined;
+    msgId?: (string) | undefined;
 }
 
 export interface RetrieveMediaRequest {
@@ -180,22 +180,22 @@ export interface SendAddressMessageOperationRequest {
 
 export interface SendButtonOperationRequest {
     token: string;
-    sendButtonRequest?: SendButtonRequest;
+    sendButtonRequest?: (SendButtonRequest) | undefined;
 }
 
 export interface SendCarouselRequest {
     token: string;
-    body?: string;
-    cards?: Array<{ [key: string]: any; }>;
-    params?: Array<object>;
-    quotedMsgId?: string;
-    chatId?: string;
-    phone?: number;
+    body?: (string) | undefined;
+    cards?: (Array<{ [key: string]: any; }>) | undefined;
+    params?: (Array<object>) | undefined;
+    quotedMsgId?: (string) | undefined;
+    chatId?: (string) | undefined;
+    phone?: (number) | undefined;
 }
 
 export interface SendContactOperationRequest {
     token: string;
-    sendContactRequest?: SendContactRequest;
+    sendContactRequest?: (SendContactRequest) | undefined;
 }
 
 export interface SendCtaUrlOperationRequest {
@@ -205,15 +205,15 @@ export interface SendCtaUrlOperationRequest {
 
 export interface SendFileRequest {
     token: string;
-    body?: string;
-    filename?: string;
-    mediaId?: string;
-    mediaType?: SendFileMediaTypeEnum;
-    voice?: boolean;
-    caption?: string;
-    quotedMsgId?: string;
-    chatId?: string;
-    phone?: number;
+    body?: (string) | undefined;
+    filename?: (string) | undefined;
+    mediaId?: (string) | undefined;
+    mediaType?: (SendFileMediaTypeEnum) | undefined;
+    voice?: (boolean) | undefined;
+    caption?: (string) | undefined;
+    quotedMsgId?: (string) | undefined;
+    chatId?: (string) | undefined;
+    phone?: (number) | undefined;
 }
 
 export interface SendFlowRequest {
@@ -222,46 +222,46 @@ export interface SendFlowRequest {
     flowId: string;
     flowToken: string;
     flowCta: string;
-    header?: SendFlowRequestHeader;
-    footer?: string;
-    flowAction?: SendFlowFlowActionEnum;
-    flowActionPayload?: object;
-    flowMessageVersion?: string;
-    mode?: SendFlowModeEnum;
-    flowActionData?: object;
-    flowActionScreen?: string;
-    quotedMsgId?: string;
-    chatId?: string;
-    phone?: number;
+    header?: (SendFlowRequestHeader) | undefined;
+    footer?: (string) | undefined;
+    flowAction?: (SendFlowFlowActionEnum) | undefined;
+    flowActionPayload?: (object) | undefined;
+    flowMessageVersion?: (string) | undefined;
+    mode?: (SendFlowModeEnum) | undefined;
+    flowActionData?: (object) | undefined;
+    flowActionScreen?: (string) | undefined;
+    quotedMsgId?: (string) | undefined;
+    chatId?: (string) | undefined;
+    phone?: (number) | undefined;
 }
 
 export interface SendListOperationRequest {
     token: string;
-    sendListRequest?: SendListRequest;
+    sendListRequest?: (SendListRequest) | undefined;
 }
 
 export interface SendLocationRequest {
     token: string;
     lat: string;
     lng: string;
-    address?: string;
-    name?: string;
-    quotedMsgId?: string;
-    chatId?: string;
-    phone?: number;
+    address?: (string) | undefined;
+    name?: (string) | undefined;
+    quotedMsgId?: (string) | undefined;
+    chatId?: (string) | undefined;
+    phone?: (number) | undefined;
 }
 
 export interface SendLocationRequestOperationRequest {
     token: string;
-    sendLocationRequestRequest?: SendLocationRequestRequest;
+    sendLocationRequestRequest?: (SendLocationRequestRequest) | undefined;
 }
 
 export interface SendMessageRequest {
     token: string;
     body: string;
-    quotedMsgId?: string;
-    chatId?: string;
-    phone?: number;
+    quotedMsgId?: (string) | undefined;
+    chatId?: (string) | undefined;
+    phone?: (number) | undefined;
 }
 
 export interface SendOrderDetailsOperationRequest {
@@ -281,7 +281,7 @@ export interface SendProductOperationRequest {
 
 export interface SendReactionOperationRequest {
     token: string;
-    sendReactionRequest?: SendReactionRequest;
+    sendReactionRequest?: (SendReactionRequest) | undefined;
 }
 
 export interface SendStickerOperationRequest {

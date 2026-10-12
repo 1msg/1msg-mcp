@@ -58,7 +58,7 @@ export interface DeleteGroupsGroupIdRequest {
 export interface GetGroupsGroupIdRequest {
     groupId: string;
     token: string;
-    fields?: string;
+    fields?: (string) | undefined;
 }
 
 export interface GetGroupsGroupIdInvitelinkRequest {
@@ -68,9 +68,9 @@ export interface GetGroupsGroupIdInvitelinkRequest {
 
 export interface ListGroupsRequest {
     token: string;
-    limit?: number;
-    before?: string;
-    after?: string;
+    limit?: (number) | undefined;
+    before?: (string) | undefined;
+    after?: (string) | undefined;
 }
 
 /**
