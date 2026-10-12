@@ -5,9 +5,7 @@
     {
       "key": "typescript|3b0d1d2c147385a1c51f10b414c0d2b850172427221482b7fc1c01a7983ad11f|src/http.ts",
       "value": 1,
-      "paths": [
-        "src/http.ts"
-      ],
+      "paths": ["src/http.ts"],
       "tokens": 52,
       "owner": "1MSG SDK/tooling maintainers",
       "expires": "2026-12-11",
@@ -20,10 +18,7 @@
     {
       "key": "typescript|e6285bd27db1ab4139f646c8d0b7e9cdee896370ed43b11de68d4b86ec996443|src/http.ts|src/index.ts",
       "value": 1,
-      "paths": [
-        "src/http.ts",
-        "src/index.ts"
-      ],
+      "paths": ["src/http.ts", "src/index.ts"],
       "tokens": 61,
       "owner": "1MSG SDK/tooling maintainers",
       "expires": "2026-12-11",
