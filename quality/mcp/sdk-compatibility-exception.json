@@ -1,0 +1,141 @@
+{
+  "id": "published-sdk-1.0.3-signature-lag",
+  "owner": "1MSG SDK/MCP maintainers",
+  "issue": "https://plane.1msg.io/1msg/browse/1MSG-156/",
+  "expires": "2026-12-11",
+  "scope": "Parameter-list compatibility between the public-contract-generated SDK and the locked published SDK used by MCP. No assertion of full wire compatibility is made for these operations.",
+  "reason": "Existing MCP handlers target workspace SDK signatures but the locked published SDK still lacks these parameters. Release the reviewed TypeScript SDK and update MCP dependency, then remove this exception after real wire tests. Do not publish from the quality task.",
+  "findings": [
+    {
+      "api": "ChannelApi",
+      "method": "createSettings",
+      "expectedParameters": ["token", "createSettingsRequest"],
+      "publishedParameters": null
+    },
+    {
+      "api": "ChannelApi",
+      "method": "listSettings",
+      "expectedParameters": ["token"],
+      "publishedParameters": null
+    },
+    {
+      "api": "FlowsApi",
+      "method": "createFlows",
+      "expectedParameters": ["token", "createFlowsRequest", "wabaAccountId?"],
+      "publishedParameters": ["token", "wabaAccountId?"]
+    },
+    {
+      "api": "FlowsApi",
+      "method": "listFlows",
+      "expectedParameters": ["token", "wabaAccountId?", "fields?"],
+      "publishedParameters": ["token", "wabaAccountId?"]
+    },
+    {
+      "api": "FlowsApi",
+      "method": "patchFlowsFlowIdAssets",
+      "expectedParameters": ["flowId", "token", "patchFlowsFlowIdAssetsRequest", "wabaAccountId?"],
+      "publishedParameters": ["flowId", "token", "wabaAccountId?"]
+    },
+    {
+      "api": "FlowsApi",
+      "method": "patchFlowsFlowIdMetadata",
+      "expectedParameters": [
+        "flowId",
+        "token",
+        "patchFlowsFlowIdMetadataRequest",
+        "wabaAccountId?"
+      ],
+      "publishedParameters": ["flowId", "token", "wabaAccountId?"]
+    },
+    {
+      "api": "GroupsApi",
+      "method": "createGroups",
+      "expectedParameters": ["token", "createGroupsRequest"],
+      "publishedParameters": ["token"]
+    },
+    {
+      "api": "GroupsApi",
+      "method": "createGroupsGroupId",
+      "expectedParameters": ["groupId", "token", "createGroupsGroupIdRequest"],
+      "publishedParameters": ["groupId", "token"]
+    },
+    {
+      "api": "GroupsApi",
+      "method": "getGroupsGroupId",
+      "expectedParameters": ["groupId", "token", "fields?"],
+      "publishedParameters": ["groupId", "token"]
+    },
+    {
+      "api": "GroupsApi",
+      "method": "listGroups",
+      "expectedParameters": ["token", "limit?", "before?", "after?"],
+      "publishedParameters": ["token"]
+    },
+    {
+      "api": "MessagingApi",
+      "method": "createUploadMedia",
+      "expectedParameters": ["token", "createUploadMediaRequest"],
+      "publishedParameters": ["token", "requestBody?"]
+    },
+    {
+      "api": "MessagingApi",
+      "method": "listMessages",
+      "expectedParameters": [
+        "token",
+        "chatId?",
+        "limit?",
+        "last?",
+        "lastMessageNumber?",
+        "firstMessageNumber?",
+        "minTime?",
+        "maxTime?",
+        "msgId?"
+      ],
+      "publishedParameters": ["token"]
+    },
+    {
+      "api": "MessagingApi",
+      "method": "sendCarousel",
+      "expectedParameters": [
+        "token",
+        "body?",
+        "cards?",
+        "params?",
+        "quotedMsgId?",
+        "chatId?",
+        "phone?"
+      ],
+      "publishedParameters": ["token", "params", "body?", "quotedMsgId?", "chatId?", "phone?"]
+    },
+    {
+      "api": "MessagingApi",
+      "method": "sendProduct",
+      "expectedParameters": ["token", "sendProductRequest"],
+      "publishedParameters": ["token", "requestBody?"]
+    },
+    {
+      "api": "ProfileApi",
+      "method": "updateMe",
+      "expectedParameters": ["token", "updateMeRequest"],
+      "publishedParameters": ["token", "updateMeRequest?"]
+    },
+    {
+      "api": "TemplatesApi",
+      "method": "listTemplates",
+      "expectedParameters": ["token", "limit?", "offset?", "sort?"],
+      "publishedParameters": ["token"]
+    },
+    {
+      "api": "TemplatesApi",
+      "method": "removeTemplate",
+      "expectedParameters": ["token", "removeTemplateRequest"],
+      "publishedParameters": ["token", "requestBody?"]
+    },
+    {
+      "api": "WebhooksApi",
+      "method": "setWebhook",
+      "expectedParameters": ["token", "setWebhookRequest"],
+      "publishedParameters": ["token", "getWebhook200Response?"]
+    }
+  ]
+}

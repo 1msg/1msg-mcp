@@ -1,9 +1,9 @@
 import { ClientConfig, type Client } from '@1msg/sdk';
 
 export interface MockChatApiClientMocks {
-  sendMessage: jest.Mock;
-  getMe: jest.Mock;
-  listMessages: jest.Mock;
+  sendMessage: jest.Mock<Promise<unknown>, unknown[]>;
+  getMe: jest.Mock<Promise<unknown>, unknown[]>;
+  listMessages: jest.Mock<Promise<unknown>, unknown[]>;
 }
 
 export interface MockChatApiClientBundle extends MockChatApiClientMocks {
@@ -18,18 +18,18 @@ export function createMockChatApiClient(): MockChatApiClientBundle {
     token: 'test-token',
   });
 
-  const sendMessage = jest.fn().mockResolvedValue({
+  const sendMessage = jest.fn<Promise<unknown>, unknown[]>().mockResolvedValue({
     sent: true,
     id: 'wamid.mock.message',
     message: 'queued',
   });
 
-  const getMe = jest.fn().mockResolvedValue({
+  const getMe = jest.fn<Promise<unknown>, unknown[]>().mockResolvedValue({
     name: 'Test Channel',
     phone: '79001234567',
   });
 
-  const listMessages = jest.fn().mockResolvedValue({
+  const listMessages = jest.fn<Promise<unknown>, unknown[]>().mockResolvedValue({
     messages: [{ id: 'msg-1', body: 'hello' }],
   });
 

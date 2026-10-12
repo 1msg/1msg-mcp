@@ -31,7 +31,7 @@ export function redactForLog(value: unknown, depth = 0): unknown {
   if (depth > 6) {
     return '[truncated]';
   }
-  if (value == null) {
+  if (value === null || value === undefined) {
     return value;
   }
   if (typeof value === 'string') {

@@ -1,10 +1,6 @@
 import type { IncomingMessage } from 'node:http';
-import {
-  extractBearerToken,
-  extractInstanceId,
-  McpAuthError,
-  resolveRequestConfig,
-} from '../auth';
+
+import { extractBearerToken, extractInstanceId, McpAuthError, resolveRequestConfig } from '../auth';
 
 function headers(map: Record<string, string>): IncomingMessage['headers'] {
   const out: IncomingMessage['headers'] = {};
@@ -26,15 +22,11 @@ describe('MCP HTTP auth', () => {
   });
 
   it('accepts X-1msg-Instance-Id alias', () => {
-    expect(extractInstanceId(headers({ 'x-1msg-instance-id': 'ODI2' }))).toBe(
-      'ODI2',
-    );
+    expect(extractInstanceId(headers({ 'x-1msg-instance-id': 'ODI2' }))).toBe('ODI2');
   });
 
   it('accepts deprecated X-Chat-Api-Instance-Id alias', () => {
-    expect(
-      extractInstanceId(headers({ 'x-chat-api-instance-id': 'ODI3' })),
-    ).toBe('ODI3');
+    expect(extractInstanceId(headers({ 'x-chat-api-instance-id': 'ODI3' }))).toBe('ODI3');
   });
 
   it('requires instance id header', () => {

@@ -1,0 +1,14 @@
+{
+  "entry": [
+    "src/index.ts!",
+    "src/http.ts!",
+    "scripts/*.{js,mjs,cjs}",
+    "jest.config.js",
+    "eslint*.mjs",
+    "quality.config.mjs",
+    "quality/mcp/generate.mjs!",
+    "quality/mcp/verify-negative.mjs!"
+  ],
+  "project": ["src/**/*.ts!", "scripts/*.{js,mjs,cjs}", "quality/mcp/*.mjs!"],
+  "ignore": ["tools/quality/**"]
+}

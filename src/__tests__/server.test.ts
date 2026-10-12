@@ -1,15 +1,10 @@
 import type { Client as SdkClient } from '@1msg/sdk';
-import { createMcpServer } from '../server';
 
 // CJS subpath exports from @modelcontextprotocol/sdk
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { Client } = require('@modelcontextprotocol/sdk/client/index.js') as {
-  Client: typeof import('@modelcontextprotocol/sdk/client/index.js').Client;
-};
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { InMemoryTransport } = require('@modelcontextprotocol/sdk/inMemory.js') as {
-  InMemoryTransport: typeof import('@modelcontextprotocol/sdk/inMemory.js').InMemoryTransport;
-};
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+
+import { createMcpServer } from '../server';
 
 function createMockClient(): SdkClient {
   return {
@@ -82,6 +77,7 @@ describe('createMcpServer tools/list', () => {
   });
 });
 
+/** Exercise MCP dispatch through linked in-memory transports and close both sides after each scenario. */
 describe('createMcpServer tools/call', () => {
   it('invokes send_message through MCP and returns JSON result', async () => {
     const mockClient = createMockClient();
@@ -113,6 +109,7 @@ describe('createMcpServer tools/call', () => {
     await server.close();
   });
 
+  /** Verify a void SDK result still produces valid textual MCP content required by consumers. */
   it('returns JSON text when a tool result is void (Cursor requires content[].text)', async () => {
     const mockClient = createMockClient();
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
@@ -131,7 +128,7 @@ describe('createMcpServer tools/call', () => {
     expect(typeof content?.[0]?.text).toBe('string');
     expect(content?.[0]?.text?.length).toBeGreaterThan(0);
     expect(JSON.parse(content?.[0]?.text as string)).toEqual(
-      expect.objectContaining({ error: expect.any(String) }),
+      expect.objectContaining({ error: expect.any(String) as unknown }),
     );
 
     await client.close();

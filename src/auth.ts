@@ -1,9 +1,6 @@
 import type { IncomingMessage } from 'node:http';
-import {
-  isClientSelectableApiHost,
-  normalizeBaseUrl,
-  type McpServerConfig,
-} from './config';
+
+import { isClientSelectableApiHost, normalizeBaseUrl, type McpServerConfig } from './config';
 
 export class McpAuthError extends Error {
   readonly statusCode: number;
@@ -15,10 +12,7 @@ export class McpAuthError extends Error {
   }
 }
 
-function headerValue(
-  headers: IncomingMessage['headers'],
-  name: string,
-): string | undefined {
+function headerValue(headers: IncomingMessage['headers'], name: string): string | undefined {
   const raw = headers[name.toLowerCase()];
   if (Array.isArray(raw)) {
     return raw[0]?.trim() || undefined;
@@ -72,13 +66,9 @@ export interface HttpHostConfig {
   baseUrl: string;
 }
 
-function extractBaseUrlOverride(
-  headers: IncomingMessage['headers'],
-): string | undefined {
-  return (
-    headerValue(headers, 'x-1msg-base-url') ||
-    headerValue(headers, 'x-base-url')
-  );
+/** Read the explicit channel API override from environment settings without falling back to an unrelated credential field. */
+function extractBaseUrlOverride(headers: IncomingMessage['headers']): string | undefined {
+  return headerValue(headers, 'x-1msg-base-url') || headerValue(headers, 'x-base-url');
 }
 
 /** Build per-request MCP/SDK config from host env + request headers. */

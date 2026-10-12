@@ -1,0 +1,22 @@
+{
+  "sourceRepository": "https://github.com/1msg/1msg-api",
+  "producerSha256": "c6bd3039334b1d4f36d531db1c97596af3467862327d11437c65c42b413df066",
+  "contractSha256": "b26aa068f67c892144f2f9f2d9d0ce7a39bb12ff8ad01fd52e68f950fcc2f18c",
+  "sdkVersion": "1.0.3",
+  "sdkSignatures": {
+    "CallingApi.ts": "129eb7db5b92150022f9da64dae6b85a7db267ae3478e1979f8d71583db458e0",
+    "CatalogApi.ts": "b85c2c5a0f61f6cfbfca720a1e0c03a5b9abf7b680cec6b420705329337f7fc8",
+    "ChannelApi.ts": "a969213513f911a04bbce46357591e9c46220d8b474e075303bfd54b3b6123ff",
+    "FlowsApi.ts": "c4834948439172c986483c8a3110f49a4d138fa262be8452dba34404b85d8c15",
+    "GroupsApi.ts": "ca771e833b3506b247bf9c1c32a194573d1ef72fe0ee1ca8e8b8ca6ffedb662b",
+    "MessagingApi.ts": "9d57d04fbf78687b94a5333922dc843b62f25a83bf779a34722fdd2588c646d2",
+    "ProfileApi.ts": "b11f725dea52f2afe672b2b6413346f529feb315d336d68712b2f50f5403d217",
+    "TemplatesApi.ts": "15043c2f7ef1952982681105cc83d4599222feeeb1029ef83e65692b72495639",
+    "UsersApi.ts": "65cbbf11185465c4e8a0a82faa0e62f61f681a449d78f73c1714b9fa1639a5b6",
+    "WebhooksApi.ts": "a64d716467e1643463f0d0c1a508938a0cd0ab4a16bd1e1bf0e8adb9a5df4208"
+  },
+  "contractSourceCommit": "888ee40a635ab19dbff4c101b8d4329790c7254f",
+  "producerTask": "https://plane.1msg.io/1msg/browse/1MSG-156/",
+  "producerSource": "1msg-api/gen/generate-mcp-tools.js with the reviewed 1MSG-156 numeric media ID compatibility patch",
+  "signatureProducer": "OpenAPI Generator 7.22.0 plus 1msg-api TypeScript compatibility transforms, same pinned public contract"
+}

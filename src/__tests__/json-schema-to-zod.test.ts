@@ -7,7 +7,8 @@ describe('jsonSchemaToZod', () => {
     expect(createSettings).toBeDefined();
     const schema = jsonSchemaToZod(createSettings!.inputSchema);
     expect(
-      (schema.parse({ webhookUrl: 'https://hooks.example/a' }) as { webhookUrl: string }).webhookUrl,
+      (schema.parse({ webhookUrl: 'https://hooks.example/a' }) as { webhookUrl: string })
+        .webhookUrl,
     ).toBe('https://hooks.example/a');
     expect(
       (
@@ -25,9 +26,8 @@ describe('jsonSchemaToZod', () => {
     expect((schema.parse({ mediaId: '1597399065095084' }) as { mediaId: string }).mediaId).toBe(
       '1597399065095084',
     );
-    const fromNumber = (
-      schema.parse({ mediaId: 1597399065095084 }) as { mediaId: string | number }
-    ).mediaId;
+    const fromNumber = (schema.parse({ mediaId: 1597399065095084 }) as { mediaId: string | number })
+      .mediaId;
     expect(String(fromNumber)).toBe('1597399065095084');
   });
 });

@@ -13,7 +13,7 @@ OpenAPI YAML (1msg-api monorepo)
 
 Generated files (`src/tools.generated.ts`, `src/handlers.generated.ts`) are produced in `1msg-api` and synced into this distribution repo when tools change.
 
-| Transport | Entry | Config |
-|-----------|-------|--------|
-| stdio | `dist/index.js` | Process env `ONE_MSG_*` (deprecated: `CHAT_API_*`). API root: `https://api.1msg.io` or `https://sandbox.1msg.io` |
-| HTTP (Cloud) | `dist/http.js` | Per request: `Authorization: Bearer` + `X-Instance-Id`; optional `X-1msg-Base-Url` (`https://api.1msg.io` or `https://sandbox.1msg.io`). Default upstream from host `ONE_MSG_BASE_URL` |
+| Transport    | Entry           | Config                                                                                                                                                                                 |
+| ------------ | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| stdio        | `dist/index.js` | Process env `ONE_MSG_*` (deprecated: `CHAT_API_*`). API root: `https://api.1msg.io` or `https://sandbox.1msg.io`                                                                       |
+| HTTP (Cloud) | `dist/http.js`  | Per request: `Authorization: Bearer` + `X-Instance-Id`; optional `X-1msg-Base-Url` (`https://api.1msg.io` or `https://sandbox.1msg.io`). Default upstream from host `ONE_MSG_BASE_URL` |
