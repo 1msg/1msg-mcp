@@ -6,7 +6,8 @@
     "exactOptionalPropertyTypes": true,
     "noEmitOnError": true,
     "rootDir": ".",
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "isolatedModules": true
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
   "exclude": [
