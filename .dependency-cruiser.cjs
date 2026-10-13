@@ -33,7 +33,7 @@ module.exports = {
       name: 'no-sdk-in-pure-transforms',
       severity: 'error',
       from: {
-        path: '^src/(?:auth|json-schema-to-zod|logging|rate-limit)\\.ts$',
+        path: '^src/(?:auth|json-schema-to-zod|logging|rate-limit)\\.(?:ts|tsx|mts|cts)$',
       },
       to: {
         path: 'node_modules/(?:@1msg|express|@modelcontextprotocol)/',
@@ -51,7 +51,7 @@ module.exports = {
     enhancedResolveOptions: {
       exportsFields: ['exports'],
       conditionNames: ['require', 'node', 'default'],
-      extensions: ['.js', '.ts', '.json'],
+      extensions: ['.js', '.jsx', '.mjs', '.cjs', '.ts', '.tsx', '.mts', '.cts', '.json'],
     },
     exclude: '(?:^|/)node_modules/',
   },

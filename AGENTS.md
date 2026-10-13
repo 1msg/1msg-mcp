@@ -11,3 +11,5 @@ Historical debt is recorded per finding in `quality/baselines`, with adoption SH
 The `quality-required` job fails on failed/skipped/cancelled prerequisites. Configure branch protection to require it; YAML alone does not change server protection. Tests use isolated/local inputs; never point them at production services.
 
 Generated MCP files are owned by the pinned API producer. Run `npm run test:generated` to replay the exact producer against the checksummed public contract and locked SDK declarations, including changed/deleted/ignored-output negative fixtures. Update the producer provenance before deliberately running `node quality/mcp/generate.mjs --write`; never hand-edit the two generated files.
+
+The strict source program excludes only `quality/mcp/vendor/apis/**`: these incomplete API snapshots are checksummed generator inputs, not executable modules. `test:generated` verifies their exact provenance; generated runtime outputs remain in the strict program. All authored TS/TSX/MTS/CTS files remain covered.

@@ -6,6 +6,7 @@ export default [
       '**/dist/**',
       '**/tools/quality/**',
       '**/quality/reports/**',
+      'quality/mcp/vendor/apis/**',
       'src/tools.generated.ts',
       'src/handlers.generated.ts',
     ],
