@@ -33,25 +33,32 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "add_template",
     "operationId": "addTemplate",
-    "description": "Create message template",
+    "description": "Create a WABA message template (`name`, `category`, `language`, `components`).\nAfter create, Meta reviews the template; list it with `GET /templates`.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "Template name",
+          "example": "hello_world"
         },
         "category": {
-          "type": "string"
+          "type": "string",
+          "description": "MARKETING, UTILITY, or AUTHENTICATION",
+          "example": "UTILITY"
         },
         "language": {
-          "type": "string"
+          "type": "string",
+          "description": "Template language code (e.g. en_US)",
+          "example": "en_US"
         },
         "components": {
           "type": "array",
           "items": {
             "type": "object",
             "additionalProperties": true
-          }
+          },
+          "description": "Template components (HEADER, BODY, FOOTER, BUTTONS, CAROUSEL)"
         }
       },
       "additionalProperties": false
@@ -339,7 +346,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "create_settings",
     "operationId": "createSettings",
-    "description": "Update channel settings. Only send fields you want to change.\n\n`webhookUrl` **replaces** the stored list (one URL string, or up to 5 URLs as an array).\nPassing an empty value clears webhooks.\n",
+    "description": "Update channel settings. Only send fields you want to change.\n\n`webhookUrl` **replaces** the stored list (one URL string, or up to 5 URLs as an array).\nPassing an empty value clears webhooks. Repeating the same URL(s) also clears a\nsticky auto-disable. With several URLs, send the complete array to re-enable one\nof them — omitting a URL removes it from the channel.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -460,11 +467,11 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
       "type": "object",
       "properties": {
         "mediaId": {
-          "oneOf": [
-            { "type": "string" },
-            { "type": "integer" }
+          "type": [
+            "string",
+            "number"
           ],
-          "description": "Numeric WABA media id (string or number)"
+          "description": "Numeric WABA media id"
         }
       },
       "additionalProperties": false,
@@ -628,7 +635,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "get_me",
     "operationId": "getMe",
-    "description": "Get WhatsApp Business Account profile information",
+    "description": "Return the WhatsApp Business profile for this channel: About, address,\ndescription, email, phone, websites, industry (`vertical`), and profile photo URL.\n",
     "inputSchema": {
       "type": "object",
       "properties": {},
@@ -650,7 +657,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "get_status",
     "operationId": "getStatus",
-    "description": "Returns WhatsApp Business API client connection status.",
+    "description": "Return WhatsApp Cloud API connection status for this channel (`connected`\nwhen the number can send). May include `accountStatus`, messaging limit,\nand MM Lite availability.\n\nOptional `health_status_warning` appears only when Meta Graph health could\nnot be loaded and a soft `connected` response is returned. Omitted on the\nnormal path and when health details are not applicable for the channel —\nnever an internal provider/transport name.\n",
     "inputSchema": {
       "type": "object",
       "properties": {},
@@ -661,7 +668,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "get_webhook",
     "operationId": "getWebhook",
-    "description": "Returns the configured client webhook URL for this channel.",
+    "description": "Return the webhook URL(s) currently configured for this channel, plus delivery\nstatus for each URL.\n\n`webhookUrl` is a string when a single URL is set, an array of strings when\nmultiple URLs are configured, or `null` if none is set.\n\n**Prefer `webhookStatuses`.** The circuit breaker is per URL, not per channel.\nIf 1 of 4 URLs is sticky-disabled, that URL is skipped; the other three still\nreceive events. Send/receive are not affected.\n\nChannel-level `haveDisabledWebhooks`, `circuitState`, `reason`, `fails`,\n`trips`, and timestamps are a compatibility summary of **one** URL (the first\nsticky-disabled URL, else the first configured URL). They are not \"the channel\nis dead\".\n\n- `haveDisabledWebhooks` — `true` when **at least one** URL in `webhookUrl` is\n  sticky auto-disabled. Live URLs still get events.\n- `circuitState` — compressed scalar for that same primary URL:\n  `ok` | `degraded` | `open` | `half_open` | `disabled`.\n- `disabledWebhooks` — currently configured URLs that are sticky-disabled\n  (subset of `webhookUrl`).\n- `webhookStatuses` — one row per currently configured URL. Use this array\n  to see which endpoints are live vs skipped.\n- `fails` / `trips` / `firstFailAt` — **diagnostics for support**, not product\n  UI. `fails` = failures in a rolling ~10 minute window (not lifetime).\n  `trips` = failed recovery probes on the 15 min → 1 h → 6 h schedule (sticky\n  disable after 3). Clients can ignore these and use `webhookStatuses` +\n  `disabledWebhooks` only.\n\nSticky disable skips delivery; it does not unconfigure the URL (it stays in\n`webhookUrl`). Re-enable with `POST /webhook` or `POST /settings`. Those\nendpoints **replace** the whole list — with multiple URLs, send the full array.\n",
     "inputSchema": {
       "type": "object",
       "properties": {},
@@ -683,7 +690,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "initiate_call",
     "operationId": "initiateCall",
-    "description": "Perform a WhatsApp Calling action (beta).\n\nProxies upstream `POST /calling/calls`. Despite the historical path\nname `/initiateCall`, this endpoint handles **all** call actions:\n\n| action | Use | Required |\n|--------|-----|----------|\n| `connect` | Outbound business → user | `to` + `session` (`sdp_type: offer`) |\n| `pre_accept` | Inbound (optional, reduces audio clipping) | `call_id` + `session` (`sdp_type: answer`) |\n| `accept` | Inbound answer | `call_id` + `session` (`sdp_type: answer`) |\n| `reject` | Decline inbound | `call_id` |\n| `terminate` | Hang up | `call_id` |\n\n**SDP / media (critical)**\n- `accept` / `pre_accept` require a **WebRTC-generated SDP answer**.\n- Do **not** send Meta's offer SDP back as the answer.\n- Postman (or curl) alone **cannot** establish real media — you need a\n  WebRTC or SIP stack. 1msg only proxies signaling.\n\nAnswer within ~**30–60 seconds** of an inbound `connect` webhook or Meta\nterminates as unanswered. Common Meta errors include Calling not enabled\n(`138000`), no permission (`138006`), SDP validation failures.\n\n**Outbound** requires a prior Call Permission Request (CPR) acceptance.\nSee the **Calling** tag overview for the full outbound flow and CPR limits.\n\nTrial / `subscriptionBlocked` → **403** plain text.\nUpstream failures often return HTTP 200 with `{ \"response\": { \"error\": \"...\" } }`.\n",
+    "description": "Perform a WhatsApp Calling action (beta).\n\nProxies upstream `POST /calling/calls`. Despite the historical path\nname `/initiateCall`, this endpoint handles **all** call actions:\n\n| action | Use | Required |\n|--------|-----|----------|\n| `connect` | Outbound business → user | `to` + `session` (`sdp_type: offer`) |\n| `pre_accept` | Inbound (optional, reduces audio clipping) | `call_id` + `session` (`sdp_type: answer`) |\n| `accept` | Inbound answer | `call_id` + `session` (`sdp_type: answer`) |\n| `reject` | Decline inbound | `call_id` |\n| `terminate` | Hang up | `call_id` |\n\n**SDP / media (critical)**\n- `accept` / `pre_accept` require a **WebRTC-generated SDP answer**.\n- Do **not** send Meta's offer SDP back as the answer.\n- Postman (or curl) alone **cannot** establish real media — you need a\n  WebRTC or SIP stack. 1msg only proxies signaling.\n\nAnswer within ~**30–60 seconds** of an inbound `connect` webhook or Meta\nterminates as unanswered. Common Meta errors include Calling not enabled\n(`138000`), no permission (`138006`), SDP validation failures.\n\n**Outbound** requires a prior Call Permission Request (CPR) acceptance.\nSee the **Calling** tag overview for the full outbound flow and CPR limits.\n\nTrial / `subscriptionBlocked` → **403** plain text.\nUpstream failures often return HTTP 200 with `{ \"response\": { \"error\": \"<upstream message>\" } }`.\n`Invalid API KEY` is used only when Meta/360 body actually indicates an\ninvalid API key or token. Other upstream 401s (notably call permission\n`138006`) pass through `error.message` / `error_user_msg`.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -879,7 +886,7 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "list_settings",
     "operationId": "listSettings",
-    "description": "Return channel settings: webhook URL(s), delivery flags, and analytics toggles.\n\nThis is the same `GET /settings` endpoint as the REST API (previously missing from MCP).\n",
+    "description": "Return channel settings: webhook URL(s), delivery flags, and analytics toggles.\n\nAuto-disable / circuit state matches `GET /webhook`. **Prefer `webhookStatuses`**\n(one row per configured URL). The breaker is per URL, not per channel.\n\nChannel-level `haveDisabledWebhooks` is `true` when **at least one** URL in\n`webhookUrl` is sticky auto-disabled — not \"the channel is dead\". Live URLs\nstill receive events. Top-level `circuitState` / `reason` / `fails` / `trips`\nare a compatibility summary of one URL (first sticky-disabled, else first\nconfigured).\n\nThis is the same `GET /settings` endpoint as the REST API (previously missing from MCP).\n",
     "inputSchema": {
       "type": "object",
       "properties": {},
@@ -2268,26 +2275,32 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
   {
     "name": "set_webhook",
     "operationId": "setWebhook",
-    "description": "Set the client webhook URL for inbound events.\n\n**Replaces** the stored webhook list with this single URL (it does not append).\nTo send to several endpoints, pass an array in `webhookUrl` or use `POST /settings`.\n\nWhatsApp **Calling** events (`field=calls`) are forwarded as passthrough\npayloads with `type: \"calls\"` and `instanceId` (connect / status / terminate).\nCall permission replies arrive on the normal messages path\n(`call_permission_reply`). Details: **Calling** tag.\n",
+    "description": "Set the client webhook URL that receives inbound events for this channel.\n\n**Replaces** the stored webhook list (it does not append). To deliver the same\nevents to several endpoints, pass an array in `webhookUrl` (max 5) or use\n`POST /settings`. With several URLs already configured, posting only the\ndisabled URL **drops the others** — send the complete array to re-enable one\nof many.\n\nIncoming payloads include messages, delivery ACKs, group updates, coexistence\nechoes, and calling events. WhatsApp Calling payloads (`type: \"calls\"`) are\ndocumented under the **Calling** tag. Call permission replies arrive on the\nnormal messages path (`call_permission_reply`).\n\nRepeating `POST /webhook` with the same URL(s) clears an auto-disable (self-serve\nre-enable). Send/receive are not affected by webhook auto-disable.\n",
     "inputSchema": {
       "type": "object",
       "properties": {
         "webhookUrl": {
           "oneOf": [
             {
-              "type": "string"
+              "type": "string",
+              "format": "uri"
             },
             {
               "type": "array",
               "items": {
-                "type": "string"
-              }
+                "type": "string",
+                "format": "uri"
+              },
+              "maxItems": 5
             }
           ],
-          "description": "Replacement webhook URL, or array of URLs (max 5)"
+          "description": "HTTP or HTTPS URL, or array of URLs (max 5). Replaces the stored list.\nEmpty values are rejected — clear webhooks with `POST /settings`.\n"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "required": [
+        "webhookUrl"
+      ]
     },
     "inputFields": [
       "webhookUrl"
@@ -2508,17 +2521,21 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
       "properties": {
         "about": {
           "type": "string",
-          "description": "Profile About section"
+          "description": "Profile About section (WhatsApp status text)",
+          "example": "Available 9–18"
         },
         "address": {
-          "type": "string"
+          "type": "string",
+          "description": "Business address shown on the profile"
         },
         "description": {
           "type": "string",
           "description": "Business description (max 256 characters)"
         },
         "email": {
-          "type": "string"
+          "type": "string",
+          "description": "Business email shown on the profile",
+          "example": "support@example.com"
         },
         "vertical": {
           "type": "string",
@@ -2532,7 +2549,8 @@ export const GENERATED_MCP_TOOLS: GeneratedMcpTool[] = [
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "description": "Business website URLs"
         }
       },
       "additionalProperties": false

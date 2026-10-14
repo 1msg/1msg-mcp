@@ -1,0 +1,9 @@
+node_modules
+dist
+tools/quality
+quality/reports
+src/tools.generated.ts
+src/handlers.generated.ts
+
+quality/mcp/vendor/
+quality/mcp/openapi.yaml

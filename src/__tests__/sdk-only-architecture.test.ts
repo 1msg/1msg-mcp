@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 const MCP_SRC = path.resolve(__dirname, '..');
 /** Hand-written sources that must not call Chat API over HTTP directly. */
@@ -25,10 +25,13 @@ const FORBIDDEN_HTTP_PATTERNS = [
   /\bhttp\.request\s*\(/,
 ];
 
+/** Protect the MCP SDK boundary against a parallel hand-maintained HTTP client. */
 describe('MCP SDK-only architecture', () => {
+  /** Inspect the package manifest to catch undeclared architecture drift independent of local node_modules. */
   it('depends on @1msg/sdk and not on HTTP clients', () => {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const pkg = require('../../package.json') as {
+    const pkg = JSON.parse(
+      fs.readFileSync(path.resolve(__dirname, '../../package.json'), 'utf8'),
+    ) as {
       dependencies?: Record<string, string>;
       devDependencies?: Record<string, string>;
     };

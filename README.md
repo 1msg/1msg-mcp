@@ -4,17 +4,17 @@ MCP server for the [1MSG](https://1msg.io) WhatsApp Business API — **62 public
 
 Transports: **stdio** (local) and **Streamable HTTP** (Cloud).
 
-| | |
-|--|--|
-| **npm** | [`@1msg/mcp`](https://www.npmjs.com/package/@1msg/mcp) |
-| **Cloud** | https://mcp.1msg.io/mcp |
-| **SDK** | [`@1msg/sdk`](https://www.npmjs.com/package/@1msg/sdk) |
+|           |                                                        |
+| --------- | ------------------------------------------------------ |
+| **npm**   | [`@1msg/mcp`](https://www.npmjs.com/package/@1msg/mcp) |
+| **Cloud** | https://mcp.1msg.io/mcp                                |
+| **SDK**   | [`@1msg/sdk`](https://www.npmjs.com/package/@1msg/sdk) |
 
 API hosts:
 
-| Environment | `ONE_MSG_BASE_URL` |
-|-------------|--------------------|
-| Live channels | `https://api.1msg.io` |
+| Environment   | `ONE_MSG_BASE_URL`        |
+| ------------- | ------------------------- |
+| Live channels | `https://api.1msg.io`     |
 | Test channels | `https://sandbox.1msg.io` |
 
 > Source of truth for **codegen** of `tools.generated.ts` / `handlers.generated.ts` still lives in the `1msg-api` monorepo (`packages/mcp`). This repository is the **distribution** package for running and hosting the server.
@@ -35,7 +35,6 @@ npx -y @1msg/mcp
 
 For **test channels**, set `ONE_MSG_BASE_URL=https://sandbox.1msg.io` (bare `sandbox.1msg.io` is also accepted).
 
-
 ### Clone and run
 
 ```bash
@@ -54,14 +53,14 @@ npm run start:http        # Streamable HTTP → dist/http.js
 
 ## Environment variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `ONE_MSG_BASE_URL` | yes (stdio) | API root: `https://api.1msg.io` (live) or `https://sandbox.1msg.io` (test) |
-| `ONE_MSG_TOKEN` | yes (stdio) | Channel API token |
-| `ONE_MSG_INSTANCE_ID` | yes (stdio) | Channel instance id |
-| `MCP_HTTP_HOST` | no | HTTP bind host (default `0.0.0.0` in Docker) |
-| `MCP_HTTP_PORT` | no | HTTP port (default `3100`) |
-| `MCP_RATE_LIMIT_RPM` | no | Per-token rate limit for HTTP (default `60`) |
+| Variable              | Required    | Description                                                                |
+| --------------------- | ----------- | -------------------------------------------------------------------------- |
+| `ONE_MSG_BASE_URL`    | yes (stdio) | API root: `https://api.1msg.io` (live) or `https://sandbox.1msg.io` (test) |
+| `ONE_MSG_TOKEN`       | yes (stdio) | Channel API token                                                          |
+| `ONE_MSG_INSTANCE_ID` | yes (stdio) | Channel instance id                                                        |
+| `MCP_HTTP_HOST`       | no          | HTTP bind host (default `0.0.0.0` in Docker)                               |
+| `MCP_HTTP_PORT`       | no          | HTTP port (default `3100`)                                                 |
+| `MCP_RATE_LIMIT_RPM`  | no          | Per-token rate limit for HTTP (default `60`)                               |
 
 For **Cloud HTTP**, the server default upstream is `ONE_MSG_BASE_URL` (typically live). Clients send credentials per request; test channels can also send `X-1msg-Base-Url: https://sandbox.1msg.io`.
 
@@ -132,12 +131,12 @@ docker run --rm -p 3100:3100 \
 
 ## Scripts
 
-| Script | Purpose |
-|--------|---------|
-| `npm run build` | Compile TypeScript → `dist/` |
-| `npm test` | Jest unit tests |
-| `npm run smoke:tools-list` | Stdio `tools/list` smoke (expects 62 tools; uses dummy token) |
-| `npm start` / `npm run start:http` | Run stdio / HTTP servers |
+| Script                             | Purpose                                                       |
+| ---------------------------------- | ------------------------------------------------------------- |
+| `npm run build`                    | Compile TypeScript → `dist/`                                  |
+| `npm test`                         | Jest unit tests                                               |
+| `npm run smoke:tools-list`         | Stdio `tools/list` smoke (expects 62 tools; uses dummy token) |
+| `npm start` / `npm run start:http` | Run stdio / HTTP servers                                      |
 
 ## Architecture
 

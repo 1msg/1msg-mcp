@@ -1,0 +1,22 @@
+{
+  "entry": [
+    "src/index.ts!",
+    "src/http.ts!",
+    "scripts/pack-smoke.mjs",
+    "scripts/quality-extensions.test.mjs",
+    "scripts/quality-hook.test.mjs",
+    "scripts/quality-negative.mjs",
+    "scripts/smoke-tools-list.js",
+    "jest.config.js",
+    "eslint*.mjs",
+    "quality.config.mjs",
+    "quality/mcp/generate.mjs!",
+    "quality/mcp/verify-negative.mjs"
+  ],
+  "project": [
+    "src/**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}!",
+    "scripts/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}",
+    "quality/mcp/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}!"
+  ],
+  "ignore": ["tools/quality/**"]
+}

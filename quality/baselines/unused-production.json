@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "adoptionBase": "b46574a4563dc7cae6a7dfc5b378058c01053aa8",
+  "entries": [
+    {
+      "key": "src/__tests__/mock-sdk.ts|files|src/__tests__/mock-sdk.ts",
+      "value": 1,
+      "path": "src/__tests__/mock-sdk.ts",
+      "rule": "files",
+      "symbol": "src/__tests__/mock-sdk.ts",
+      "owner": "1MSG SDK/tooling maintainers",
+      "expires": "2026-12-11",
+      "reason": "Historical findings replayed at the adoption base; each item is tracked independently and cannot increase.",
+      "issue": "https://plane.1msg.io/1msg/browse/1MSG-156/",
+      "evidence": {
+        "src/__tests__/mock-sdk.ts": "240a4e2d68e7f02bb0154face80066391e91a01cf06fb9bbd67927ffd61e93ee"
+      }
+    },
+    {
+      "key": "src/auth.ts|exports|extractBearerToken",
+      "value": 1,
+      "path": "src/auth.ts",
+      "rule": "exports",
+      "symbol": "extractBearerToken",
+      "owner": "1MSG SDK/tooling maintainers",
+      "expires": "2026-12-11",
+      "reason": "Historical findings replayed at the adoption base; each item is tracked independently and cannot increase.",
+      "issue": "https://plane.1msg.io/1msg/browse/1MSG-156/",
+      "evidence": {
+        "src/auth.ts": "33b9b5e0d89bc6f99366ada3314e9ec0b49a249f06ca29b6cdac39bbcb48c137"
+      }
+    },
+    {
+      "key": "src/auth.ts|exports|extractInstanceId",
+      "value": 1,
+      "path": "src/auth.ts",
+      "rule": "exports",
+      "symbol": "extractInstanceId",
+      "owner": "1MSG SDK/tooling maintainers",
+      "expires": "2026-12-11",
+      "reason": "Historical findings replayed at the adoption base; each item is tracked independently and cannot increase.",
+      "issue": "https://plane.1msg.io/1msg/browse/1MSG-156/",
+      "evidence": {
+        "src/auth.ts": "33b9b5e0d89bc6f99366ada3314e9ec0b49a249f06ca29b6cdac39bbcb48c137"
+      }
+    },
+    {
+      "key": "src/logging.ts|exports|redactForLog",
+      "value": 1,
+      "path": "src/logging.ts",
+      "rule": "exports",
+      "symbol": "redactForLog",
+      "owner": "1MSG SDK/tooling maintainers",
+      "expires": "2026-12-11",
+      "reason": "Historical findings replayed at the adoption base; each item is tracked independently and cannot increase.",
+      "issue": "https://plane.1msg.io/1msg/browse/1MSG-156/",
+      "evidence": {
+        "src/logging.ts": "440ae2ef2df7f4e61422dabc7dc2b65c6c9b3250076cbb68660cff39e09ab935"
+      }
+    },
+    {
+      "key": "src/tools.generated.ts|exports|GENERATED_MCP_TOOL_COUNT",
+      "value": 1,
+      "path": "src/tools.generated.ts",
+      "rule": "exports",
+      "symbol": "GENERATED_MCP_TOOL_COUNT",
+      "owner": "1MSG SDK/tooling maintainers",
+      "expires": "2026-12-11",
+      "reason": "Historical findings replayed at the adoption base; each item is tracked independently and cannot increase.",
+      "issue": "https://plane.1msg.io/1msg/browse/1MSG-156/",
+      "evidence": {
+        "src/tools.generated.ts": "42ea1d71d60f5f90ebed4ecc28dc390bee0864eae911de665ba4a168ae9a024f"
+      }
+    }
+  ]
+}

@@ -10,15 +10,23 @@ function jsonResponse(body: unknown, status = 200): Response {
   } as Response;
 }
 
+/** Exercise compatibility request transformations with a recorded fake transport and restore global state afterward. */
 describe('polyfillChannelSettings', () => {
   const calls: Array<{ url: string; init?: RequestInit }> = [];
 
+  /** Install a fresh request recorder per test so call assertions cannot inherit requests from another case. */
   beforeEach(() => {
     calls.length = 0;
-    global.fetch = jest.fn(async (url: string | URL, init?: RequestInit) => {
-      calls.push({ url: String(url), init });
-      return jsonResponse({ sent: true, path: String(url) });
-    }) as typeof fetch;
+    /** Record URL and explicitly supplied options while returning an isolated successful JSON response. */
+    global.fetch = jest.fn(
+      /** Record request input and return an isolated JSON response. */ async (
+        url: string | URL,
+        init?: RequestInit,
+      ) => {
+        calls.push({ url: String(url), ...(init === undefined ? {} : { init }) });
+        return jsonResponse({ sent: true, path: String(url) });
+      },
+    ) as typeof fetch;
   });
 
   afterEach(() => {

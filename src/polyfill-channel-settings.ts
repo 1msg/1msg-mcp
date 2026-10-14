@@ -41,6 +41,7 @@ async function postJsonSafe(
   return readJson(response);
 }
 
+/** Normalize SDK contact-name aliases to the API wire keys while preserving additional caller-supplied fields. */
 function contactNameForApi(name: unknown): unknown {
   if (typeof name === 'string') {
     return { formatted_name: name, first_name: name.split(/\s+/)[0] };
@@ -53,12 +54,12 @@ function contactNameForApi(name: unknown): unknown {
   const first =
     raw.first_name ??
     raw.firstName ??
-    (formatted != null ? String(formatted).split(/\s+/)[0] : undefined);
+    (formatted !== null && formatted !== undefined ? String(formatted).split(/\s+/)[0] : undefined);
   const last = raw.last_name ?? raw.lastName;
   const out: Record<string, unknown> = {};
-  if (formatted != null) out.formatted_name = formatted;
-  if (first != null) out.first_name = first;
-  if (last != null) out.last_name = last;
+  if (formatted !== null && formatted !== undefined) out.formatted_name = formatted;
+  if (first !== null && first !== undefined) out.first_name = first;
+  if (last !== null && last !== undefined) out.last_name = last;
   for (const [key, value] of Object.entries(raw)) {
     if (['formattedName', 'firstName', 'lastName', 'middleName'].includes(key)) {
       continue;
@@ -68,13 +69,15 @@ function contactNameForApi(name: unknown): unknown {
   return out;
 }
 
+/** Normalize each object contact name without mutating the caller payload; non-object inputs pass through unchanged. */
 function sendContactPayload(body: unknown): unknown {
   if (!body || typeof body !== 'object') {
     return body;
   }
   const payload = { ...(body as Record<string, unknown>) };
   if (Array.isArray(payload.contacts)) {
-    payload.contacts = payload.contacts.map((item) => {
+    /** Normalize object contacts individually while leaving unknown primitive entries available for upstream validation. */
+    payload.contacts = payload.contacts.map((item: unknown) => {
       if (!item || typeof item !== 'object') return item;
       const contact = { ...(item as Record<string, unknown>) };
       contact.name = contactNameForApi(contact.name);
@@ -115,6 +118,22 @@ function sendCarouselPayload(
     }
   }
   return payload;
+}
+
+/** Delete canonical media first; only a non-success response activates the supported legacy endpoint. */
+async function deleteMediaRequest(
+  buildUrl: (path: string) => string,
+  mediaId: string,
+): Promise<unknown> {
+  const response = await fetch(buildUrl(`/media/${encodeURIComponent(mediaId)}`), {
+    method: 'DELETE',
+  });
+  if (response.ok) {
+    const text = await response.text();
+    const result: unknown = text ? JSON.parse(text) : { result: 'success' };
+    return result;
+  }
+  return postJsonSafe(buildUrl, '/deleteMedia', { mediaId });
 }
 
 /**
@@ -178,17 +197,9 @@ export function polyfillChannelSettings(client: ChannelSettingsClient): void {
     ) => Promise<unknown>;
   };
 
-  messaging.deleteMedia = async (first: string, second?: string) => {
-    const mediaId = pickNumericMediaId(first, second);
-    const response = await fetch(buildUrl(`/media/${encodeURIComponent(mediaId)}`), {
-      method: 'DELETE',
-    });
-    if (response.ok) {
-      const text = await response.text();
-      return text ? JSON.parse(text) : { result: 'success' };
-    }
-    return postJsonSafe(buildUrl, '/deleteMedia', { mediaId });
-  };
+  /** Resolve the media identifier across both supported SDK argument orders before running the deletion scenario. */
+  messaging.deleteMedia = (first: string, second?: string) =>
+    deleteMediaRequest(buildUrl, pickNumericMediaId(first, second));
 
   messaging.createUploadMedia = async (_token: string, body?: unknown) => {
     const payload: Record<string, unknown> =

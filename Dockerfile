@@ -2,15 +2,15 @@
 #   docker build -t 1msg/1msg-mcp-http:local .
 #   docker run --rm -p 3100:3100 -e ONE_MSG_BASE_URL=https://api.1msg.io 1msg/1msg-mcp-http:local
 
-FROM node:20-alpine AS build
+FROM node:24.19.0-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm ci || npm install
+RUN npm ci
 COPY tsconfig.json tsconfig.build.json ./
 COPY src ./src
 RUN npm run build && npm prune --omit=dev
 
-FROM node:20-alpine
+FROM node:24.19.0-alpine
 WORKDIR /app
 ENV NODE_ENV=production
 ENV MCP_HTTP_HOST=0.0.0.0

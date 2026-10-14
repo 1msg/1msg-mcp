@@ -1,15 +1,8 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
-import type { Client as McpClientType } from '@modelcontextprotocol/sdk/client/index.js';
-import type { InMemoryTransport as InMemoryTransportType } from '@modelcontextprotocol/sdk/inMemory.js';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+
 import { createMcpServer } from '../server';
 import { createMockChatApiClient, type MockChatApiClientBundle } from './mock-sdk';
-
-const { Client } = require('@modelcontextprotocol/sdk/client') as {
-  Client: typeof McpClientType;
-};
-const { InMemoryTransport } = require('@modelcontextprotocol/sdk/inMemory.js') as {
-  InMemoryTransport: typeof InMemoryTransportType;
-};
 
 async function connectTestMcpClient(mock: MockChatApiClientBundle) {
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
@@ -22,11 +15,13 @@ async function connectTestMcpClient(mock: MockChatApiClientBundle) {
   return { mcpClient, server };
 }
 
+/** Exercise public MCP calls using fake SDK capabilities and isolated linked transports. */
 describe('createMcpServer tools/call', () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
+  /** Check normalized recipient arguments and message content through the public MCP client. */
   it('dispatches send_message to ChatApiClient.sendMessage with normalized args', async () => {
     const mock = createMockChatApiClient();
     const { mcpClient, server } = await connectTestMcpClient(mock);
@@ -51,13 +46,14 @@ describe('createMcpServer tools/call', () => {
     expect(content[0]).toMatchObject({
       type: 'text',
     });
-    const text = content[0].text ?? '';
+    const text = content[0]?.text ?? '';
     expect(text).toContain('wamid.mock.message');
 
     await mcpClient.close();
     await server.close();
   });
 
+  /** Check profile dispatch uses the configured token and returns the SDK response as textual content. */
   it('dispatches get_me to profile.getMe', async () => {
     const mock = createMockChatApiClient();
     const { mcpClient, server } = await connectTestMcpClient(mock);
@@ -70,13 +66,14 @@ describe('createMcpServer tools/call', () => {
     expect(mock.getMe).toHaveBeenCalledTimes(1);
     expect(mock.getMe).toHaveBeenCalledWith('test-token');
     expect(result.isError).toBeFalsy();
-    const text = (result.content as Array<{ text: string }>)[0].text;
+    const text = (result.content as Array<{ text: string }>)[0]?.text ?? '';
     expect(text).toContain('Test Channel');
 
     await mcpClient.close();
     await server.close();
   });
 
+  /** Check list dispatch forwards authentication and returns messages through the public MCP transport. */
   it('dispatches list_messages to messaging.listMessages', async () => {
     const mock = createMockChatApiClient();
     const { mcpClient, server } = await connectTestMcpClient(mock);
@@ -87,15 +84,16 @@ describe('createMcpServer tools/call', () => {
     });
 
     expect(mock.listMessages).toHaveBeenCalledTimes(1);
-    expect(mock.listMessages.mock.calls[0][0]).toBe('test-token');
+    expect(mock.listMessages.mock.calls[0]?.[0]).toBe('test-token');
     expect(result.isError).toBeFalsy();
-    const text = (result.content as Array<{ text: string }>)[0].text;
+    const text = (result.content as Array<{ text: string }>)[0]?.text ?? '';
     expect(text).toContain('msg-1');
 
     await mcpClient.close();
     await server.close();
   });
 
+  /** Ensure invalid tool arguments produce MCP error content instead of an unintended SDK call. */
   it('returns tool error content when required args are missing', async () => {
     const mock = createMockChatApiClient();
     const { mcpClient, server } = await connectTestMcpClient(mock);
@@ -107,7 +105,7 @@ describe('createMcpServer tools/call', () => {
 
     expect(mock.sendMessage).not.toHaveBeenCalled();
     expect(result.isError).toBe(true);
-    const text = (result.content as Array<{ text: string }>)[0].text;
+    const text = (result.content as Array<{ text: string }>)[0]?.text ?? '';
     expect(text).toContain('body');
 
     await mcpClient.close();

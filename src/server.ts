@@ -1,22 +1,15 @@
-import type { McpServer as McpServerType } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { StdioServerTransport as StdioServerTransportType } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { Client } from '@1msg/sdk';
+// CJS runtime requires explicit .js subpath exports from the MCP SDK package.
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+
 import type { McpServerConfig } from './config';
+
 import { toClientConfig } from './config';
 import { invokeGeneratedTool } from './handlers.generated';
-import { GENERATED_MCP_TOOLS } from './tools.generated';
 import { jsonSchemaToZod } from './json-schema-to-zod';
 import { polyfillChannelSettings } from './polyfill-channel-settings';
-
-// CJS runtime requires explicit .js subpath exports from the MCP SDK package.
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { McpServer } = require('@modelcontextprotocol/sdk/server/mcp.js') as {
-  McpServer: typeof McpServerType;
-};
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio.js') as {
-  StdioServerTransport: typeof StdioServerTransportType;
-};
+import { GENERATED_MCP_TOOLS } from './tools.generated';
 
 const SERVER_NAME = '@1msg/mcp';
 const SERVER_VERSION = '1.2.8';
@@ -30,7 +23,8 @@ function serializeToolResult(result: unknown): string {
   // Published @1msg/sdk createUploadMedia is void and used to hit this.
   if (result === undefined) {
     return JSON.stringify({
-      error: 'API returned no JSON body. Hosted MCP polyfills create_upload_media; use url or body.',
+      error:
+        'API returned no JSON body. Hosted MCP polyfills create_upload_media; use url or body.',
     });
   }
   return JSON.stringify(result, null, 2);
@@ -62,7 +56,7 @@ function formatToolError(error: unknown): string {
 }
 
 /** Create MCP server with all generated Chat API tools. */
-export function createMcpServer(client: Client): McpServerType {
+export function createMcpServer(client: Client): McpServer {
   polyfillChannelSettings(client);
   const server = new McpServer({
     name: SERVER_NAME,
@@ -110,7 +104,7 @@ export function createMcpServer(client: Client): McpServerType {
 }
 
 /** Start MCP stdio server using SDK client derived from env config. */
-export async function startMcpServer(config: McpServerConfig): Promise<McpServerType> {
+export async function startMcpServer(config: McpServerConfig): Promise<McpServer> {
   const client = new Client(toClientConfig(config));
   const server = createMcpServer(client);
   const transport = new StdioServerTransport();
