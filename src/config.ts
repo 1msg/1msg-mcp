@@ -29,9 +29,7 @@ export function normalizeBaseUrl(raw: string): string {
     throw new Error('ONE_MSG_BASE_URL must not be empty.');
   }
 
-  const withScheme = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(trimmed)
-    ? trimmed
-    : `https://${trimmed}`;
+  const withScheme = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(trimmed) ? trimmed : `https://${trimmed}`;
 
   let parsed: URL;
   try {
@@ -109,19 +107,12 @@ export function loadMcpConfig(): McpServerConfig {
     missing.push('ONE_MSG_BASE_URL');
   }
 
-  const token = readEnv('ONE_MSG_TOKEN', [
-    'CHAT_API_TOKEN',
-    'CHAT_API_KEY',
-    'TOKEN',
-  ]);
+  const token = readEnv('ONE_MSG_TOKEN', ['CHAT_API_TOKEN', 'CHAT_API_KEY', 'TOKEN']);
   if (!token) {
     missing.push('ONE_MSG_TOKEN');
   }
 
-  const instanceId = readEnv('ONE_MSG_INSTANCE_ID', [
-    'CHAT_API_INSTANCE_ID',
-    'INSTANCE_ID',
-  ]);
+  const instanceId = readEnv('ONE_MSG_INSTANCE_ID', ['CHAT_API_INSTANCE_ID', 'INSTANCE_ID']);
   if (!instanceId) {
     missing.push('ONE_MSG_INSTANCE_ID');
   }

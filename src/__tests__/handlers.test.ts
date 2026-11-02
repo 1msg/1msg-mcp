@@ -1,4 +1,5 @@
 import type { Client } from '@1msg/sdk';
+
 import { invokeGeneratedTool } from '../handlers.generated';
 import { GENERATED_MCP_TOOLS } from '../tools.generated';
 
@@ -26,6 +27,7 @@ function createMockClient(): Client {
   } as unknown as Client;
 }
 
+/** Verify generated dispatch and compatibility normalization against a fake SDK without contacting upstream services. */
 describe('invokeGeneratedTool', () => {
   it('delegates send_message to ChatApiClient.sendMessage', async () => {
     const client = createMockClient();
@@ -64,6 +66,7 @@ describe('invokeGeneratedTool', () => {
     );
   });
 
+  /** Assert contact-card wire nesting survives the compatibility adapter and excludes the obsolete singular field. */
   it('wraps send_contact.contact into contacts[] so the published SDK keeps the card', async () => {
     const client = createMockClient();
 
@@ -84,9 +87,9 @@ describe('invokeGeneratedTool', () => {
         ],
       }),
     );
-    expect((client.messaging.sendContact as jest.Mock).mock.calls[0][1]).not.toHaveProperty(
-      'contact',
-    );
+    expect(
+      (client.messaging.sendContact as jest.Mock<Promise<unknown>, unknown[]>).mock.calls[0]?.[1],
+    ).not.toHaveProperty('contact');
   });
 
   it('wraps send_carousel.cards into params', async () => {
@@ -128,9 +131,9 @@ describe('invokeGeneratedTool', () => {
     const client = createMockClient();
 
     await invokeGeneratedTool(client, 'list_settings', {});
-    expect((client.channel as unknown as { listSettings: jest.Mock }).listSettings).toHaveBeenCalledWith(
-      'test-api-token',
-    );
+    expect(
+      (client.channel as unknown as { listSettings: jest.Mock }).listSettings,
+    ).toHaveBeenCalledWith('test-api-token');
 
     await invokeGeneratedTool(client, 'create_settings', {
       webhookUrl: 'https://example.com/hook',

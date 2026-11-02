@@ -1,24 +1,32 @@
 import { z } from 'zod';
+
 import type { JsonSchema } from './tools.generated';
 
+/** Build a union from each supported schema alternative; an empty alternatives list accepts unknown data. */
 function unionFromSchemas(schemas: JsonSchema[]): z.ZodTypeAny {
   const parts = schemas.map((item) => jsonPropertyToZod(item));
   if (parts.length === 0) {
     return z.unknown();
   }
   if (parts.length === 1) {
-    return parts[0];
+    return parts[0] ?? z.unknown();
   }
   return z.union(parts as [z.ZodTypeAny, z.ZodTypeAny, ...z.ZodTypeAny[]]);
 }
 
+/** Translate supported generated property constraints into Zod validators while retaining optional array item semantics. */
 function jsonPropertyToZod(schema: JsonSchema): z.ZodTypeAny {
   if (schema.enum && schema.enum.length > 0) {
     const values = schema.enum.filter((value): value is string | number => {
       return typeof value === 'string' || typeof value === 'number';
     });
     if (values.length > 0) {
-      return z.union(values.map((value) => z.literal(value)) as [z.ZodLiteral<string | number>, ...z.ZodLiteral<string | number>[]]);
+      return z.union(
+        values.map((value) => z.literal(value)) as [
+          z.ZodLiteral<string | number>,
+          ...z.ZodLiteral<string | number>[],
+        ],
+      );
     }
   }
 
@@ -28,7 +36,13 @@ function jsonPropertyToZod(schema: JsonSchema): z.ZodTypeAny {
   }
 
   if (Array.isArray(schema.type) && schema.type.length > 1) {
-    return unionFromSchemas(schema.type.map((type) => ({ type, items: schema.items })));
+    return unionFromSchemas(
+      /** Keep array metadata only when present so exact optional properties remain valid. */
+      schema.type.map((type) => ({
+        type,
+        ...(schema.items === undefined ? {} : { items: schema.items }),
+      })),
+    );
   }
 
   const type = Array.isArray(schema.type) ? schema.type[0] : schema.type;

@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "adoptionBase": "b46574a4563dc7cae6a7dfc5b378058c01053aa8",
+  "entries": [
+    {
+      "key": "src/http.ts|max-lines-per-function|[[\"FunctionDeclaration\",\"createHttpApp\",\"instance\"],[\"VariableDeclaration\",\"handleMcp\"],[\"ArrowFunction\",\"<anonymous>\",\"instance\"]]",
+      "value": 144,
+      "path": "src/http.ts",
+      "rule": "max-lines-per-function",
+      "scope": "[[\"FunctionDeclaration\",\"createHttpApp\",\"instance\"],[\"VariableDeclaration\",\"handleMcp\"],[\"ArrowFunction\",\"<anonymous>\",\"instance\"]]",
+      "owner": "1MSG SDK/tooling maintainers",
+      "expires": "2026-12-11",
+      "reason": "Historical maintainability findings replayed at the adoption base; individual measurements cannot increase.",
+      "issue": "https://plane.1msg.io/1msg/browse/1MSG-156/",
+      "evidence": {
+        "src/http.ts": "cff07d8244daba9dae1551c4844f15a4c923bbd3f33ab3cd7a5f67987567a6e8"
+      }
+    },
+    {
+      "key": "src/http.ts|max-lines-per-function|[[\"FunctionDeclaration\",\"createHttpApp\",\"instance\"]]",
+      "value": 176,
+      "path": "src/http.ts",
+      "rule": "max-lines-per-function",
+      "scope": "[[\"FunctionDeclaration\",\"createHttpApp\",\"instance\"]]",
+      "owner": "1MSG SDK/tooling maintainers",
+      "expires": "2026-12-11",
+      "reason": "Historical maintainability findings replayed at the adoption base; individual measurements cannot increase.",
+      "issue": "https://plane.1msg.io/1msg/browse/1MSG-156/",
+      "evidence": {
+        "src/http.ts": "cff07d8244daba9dae1551c4844f15a4c923bbd3f33ab3cd7a5f67987567a6e8"
+      }
+    },
+    {
+      "key": "src/polyfill-channel-settings.ts|max-params|[[\"FunctionDeclaration\",\"polyfillChannelSettings\",\"instance\"],[\"assignment\",[\"member\",[\"identifier\",\"messaging\"],\"sendCarousel\"]],[\"ArrowFunction\",\"<anonymous>\",\"instance\"]]",
+      "value": 6,
+      "path": "src/polyfill-channel-settings.ts",
+      "rule": "max-params",
+      "scope": "[[\"FunctionDeclaration\",\"polyfillChannelSettings\",\"instance\"],[\"assignment\",[\"member\",[\"identifier\",\"messaging\"],\"sendCarousel\"]],[\"ArrowFunction\",\"<anonymous>\",\"instance\"]]",
+      "owner": "1MSG SDK/tooling maintainers",
+      "expires": "2026-12-11",
+      "reason": "Historical maintainability findings replayed at the adoption base; individual measurements cannot increase.",
+      "issue": "https://plane.1msg.io/1msg/browse/1MSG-156/",
+      "evidence": {
+        "src/polyfill-channel-settings.ts": "0f6513f22ca02aa9809be547ee83daea2508c082a7118a34df4da5c3b8d39fdc"
+      }
+    },
+    {
+      "key": "src/polyfill-channel-settings.ts|max-params|[[\"FunctionDeclaration\",\"polyfillChannelSettings\",\"instance\"]]",
+      "value": 6,
+      "path": "src/polyfill-channel-settings.ts",
+      "rule": "max-params",
+      "scope": "[[\"FunctionDeclaration\",\"polyfillChannelSettings\",\"instance\"]]",
+      "owner": "1MSG SDK/tooling maintainers",
+      "expires": "2026-12-11",
+      "reason": "Historical maintainability findings replayed at the adoption base; individual measurements cannot increase.",
+      "issue": "https://plane.1msg.io/1msg/browse/1MSG-156/",
+      "evidence": {
+        "src/polyfill-channel-settings.ts": "0f6513f22ca02aa9809be547ee83daea2508c082a7118a34df4da5c3b8d39fdc"
+      }
+    }
+  ]
+}

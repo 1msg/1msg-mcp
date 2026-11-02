@@ -1,8 +1,10 @@
 import { RateLimiter, rateLimitKeyFromToken } from '../rate-limit';
 
+/** Use an injected clock to verify rate-limit boundaries without sleeping or depending on wall time. */
 describe('RateLimiter', () => {
+  /** Assert the inclusive allowed-count boundary and rejection of the immediately following request. */
   it('allows up to limit then rejects', () => {
-    let now = 1_000;
+    const now = 1_000;
     const limiter = new RateLimiter({
       limit: 2,
       windowMs: 60_000,

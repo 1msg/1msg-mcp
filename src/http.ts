@@ -1,37 +1,25 @@
 #!/usr/bin/env node
-
-import { createHash, randomUUID } from 'node:crypto';
-import type { Request, Response } from 'express';
 import type { McpServer as McpServerType } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { StreamableHTTPServerTransport as StreamableHTTPServerTransportType } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
+import type { Request, Response } from 'express';
+
 import { Client } from '@1msg/sdk';
+import { createMcpExpressApp } from '@modelcontextprotocol/sdk/server/express.js';
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
+import { createHash, randomUUID } from 'node:crypto';
+
 import { McpAuthError, resolveRequestConfig } from './auth';
 import { normalizeBaseUrl, toClientConfig } from './config';
 import { hashIdentifier, logRequest } from './logging';
 import { RateLimiter, rateLimitKeyFromToken } from './rate-limit';
 import { createMcpServer } from './server';
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { StreamableHTTPServerTransport } = require('@modelcontextprotocol/sdk/server/streamableHttp.js') as {
-  StreamableHTTPServerTransport: typeof StreamableHTTPServerTransportType;
-};
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { isInitializeRequest } = require('@modelcontextprotocol/sdk/types.js') as {
-  isInitializeRequest: (value: unknown) => boolean;
-};
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { createMcpExpressApp } = require('@modelcontextprotocol/sdk/server/express.js') as {
-  createMcpExpressApp: (options?: {
-    host?: string;
-    allowedHosts?: string[];
-  }) => import('express').Express;
-};
-
 const PACKAGE_NAME = '@1msg/mcp';
 const VERSION = '1.2.8';
 
 interface SessionEntry {
-  transport: StreamableHTTPServerTransportType;
+  transport: StreamableHTTPServerTransport;
   server: McpServerType;
   instanceIdHash: string;
   tokenHash: string;
@@ -54,6 +42,7 @@ function readEnvInt(name: string, fallback: number): number {
   return Number.isFinite(value) && value > 0 ? value : fallback;
 }
 
+/** Validate HTTP bootstrap settings and normalize the fixed upstream base URL; omit unspecified host restrictions. */
 function loadHttpOptionsFromEnv(): HttpServerOptions {
   const baseUrl =
     process.env.ONE_MSG_BASE_URL?.trim() ||
@@ -61,9 +50,7 @@ function loadHttpOptionsFromEnv(): HttpServerOptions {
     process.env.CHAT_API_ROOT_URL?.trim() ||
     process.env.CHAT_API_URL?.trim();
   if (!baseUrl) {
-    throw new Error(
-      'ONE_MSG_BASE_URL is required for HTTP mode (fixed upstream API root).',
-    );
+    throw new Error('ONE_MSG_BASE_URL is required for HTTP mode (fixed upstream API root).');
   }
 
   const allowedHosts = process.env.MCP_ALLOWED_HOSTS?.split(',')
@@ -75,7 +62,7 @@ function loadHttpOptionsFromEnv(): HttpServerOptions {
     port: readEnvInt('MCP_HTTP_PORT', 3100),
     host: process.env.MCP_HTTP_HOST?.trim() || '0.0.0.0',
     rateLimitRpm: readEnvInt('MCP_RATE_LIMIT_RPM', 60),
-    allowedHosts: allowedHosts?.length ? allowedHosts : undefined,
+    ...(allowedHosts?.length ? { allowedHosts } : {}),
   };
 }
 
@@ -104,7 +91,7 @@ export function createHttpApp(options: HttpServerOptions): import('express').Exp
 
   const app = createMcpExpressApp({
     host: options.host,
-    allowedHosts: options.allowedHosts,
+    ...(options.allowedHosts === undefined ? {} : { allowedHosts: options.allowedHosts }),
   });
 
   app.get('/healthz', (_req, res) => {
@@ -120,6 +107,7 @@ export function createHttpApp(options: HttpServerOptions): import('express').Exp
     res.status(200).json({ ok: true });
   });
 
+  /** Authenticate the request, resolve or recreate its session, enforce the rate limit and delegate to the MCP transport. */
   const handleMcp = async (req: Request, res: Response): Promise<void> => {
     const requestId = randomUUID();
     const started = Date.now();
@@ -128,10 +116,7 @@ export function createHttpApp(options: HttpServerOptions): import('express').Exp
     try {
       let credentials;
       try {
-        credentials = resolveRequestConfig(
-          { baseUrl: options.baseUrl },
-          req.headers,
-        );
+        credentials = resolveRequestConfig({ baseUrl: options.baseUrl }, req.headers);
       } catch (error) {
         if (error instanceof McpAuthError) {
           logRequest({
@@ -171,8 +156,7 @@ export function createHttpApp(options: HttpServerOptions): import('express').Exp
         return;
       }
 
-      let entry: SessionEntry | undefined =
-        sessionHeader ? sessions.get(sessionHeader) : undefined;
+      let entry: SessionEntry | undefined = sessionHeader ? sessions.get(sessionHeader) : undefined;
 
       if (entry) {
         if (entry.tokenHash !== tokenKey) {
@@ -205,7 +189,9 @@ export function createHttpApp(options: HttpServerOptions): import('express').Exp
           }
         };
 
-        await server.connect(transport);
+        // The SDK implementation permits undefined callbacks while its Transport
+        // interface marks them optional. Both refer to the same runtime contract.
+        await server.connect(transport as Transport);
         entry = {
           transport,
           server,
@@ -228,10 +214,7 @@ export function createHttpApp(options: HttpServerOptions): import('express').Exp
         sendJson(
           res,
           400,
-          mcpError(
-            -32000,
-            'Missing mcp-session-id. Send an initialize request first.',
-          ),
+          mcpError(-32000, 'Missing mcp-session-id. Send an initialize request first.'),
         );
         return;
       } else {
@@ -239,10 +222,10 @@ export function createHttpApp(options: HttpServerOptions): import('express').Exp
         // stateless transport so tools/call still works on a different LB.
         const client = new Client(toClientConfig(credentials));
         const server = createMcpServer(client);
-        const transport = new StreamableHTTPServerTransport({
-          sessionIdGenerator: undefined,
-        });
-        await server.connect(transport);
+        const transport = new StreamableHTTPServerTransport({});
+        // The SDK implementation permits undefined callbacks while its Transport
+        // interface marks them optional. Both refer to the same runtime contract.
+        await server.connect(transport as Transport);
         const closeFailover = () => {
           void transport.close();
         };
@@ -364,10 +347,9 @@ async function main(argv: string[]): Promise<number> {
 }
 
 if (require.main === module) {
+  /** Report bootstrap failure and return a failing process status to the supervising runtime. */
   main(process.argv.slice(2)).catch((error) => {
-    process.stderr.write(
-      `${error instanceof Error ? error.message : String(error)}\n`,
-    );
+    process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
     process.exitCode = 1;
   });
 }

@@ -5,15 +5,11 @@ describe('normalizeBaseUrl', () => {
     expect(normalizeBaseUrl('https://api.1msg.io')).toBe('https://api.1msg.io');
     expect(normalizeBaseUrl('https://api.1msg.io/')).toBe('https://api.1msg.io');
     expect(normalizeBaseUrl('sandbox.1msg.io')).toBe('https://sandbox.1msg.io');
-    expect(normalizeBaseUrl('http://sandbox.1msg.io')).toBe(
-      'https://sandbox.1msg.io',
-    );
+    expect(normalizeBaseUrl('http://sandbox.1msg.io')).toBe('https://sandbox.1msg.io');
     expect(normalizeBaseUrl('https://sandbox.1msg.io/HEI123/status')).toBe(
       'https://sandbox.1msg.io',
     );
-    expect(normalizeBaseUrl('https://api.sandbox.1msg.io')).toBe(
-      'https://sandbox.1msg.io',
-    );
+    expect(normalizeBaseUrl('https://api.sandbox.1msg.io')).toBe('https://sandbox.1msg.io');
   });
 
   it('keeps custom hosts (origin only)', () => {
