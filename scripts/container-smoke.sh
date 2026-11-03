@@ -19,6 +19,7 @@ done
 docker exec -i "$name" node --input-type=module <<'NODE'
 import assert from 'node:assert/strict';
 const base = 'http://127.0.0.1:3100';
+assert.equal(process.versions.node, '24.22.2', 'Shipping image must use the pinned runtime');
 assert.notEqual(process.getuid(), 0, 'Shipping image must run as a non-root user');
 for (const path of ['/healthz', '/readyz']) {
   const response = await fetch(base + path);
