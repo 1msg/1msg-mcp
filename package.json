@@ -1,6 +1,6 @@
 {
   "name": "@1msg/mcp",
-  "version": "1.2.9",
+  "version": "1.2.10",
   "description": "MCP server for the 1msg API (stdio + Streamable HTTP)",
   "license": "MIT",
   "repository": {
@@ -34,7 +34,7 @@
     "start:http": "node dist/http.js",
     "test": "jest",
     "smoke:tools-list": "node scripts/smoke-tools-list.js",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "pnpm run build",
     "typecheck": "tsc -p tsconfig.quality.json",
     "lint:static": "node tools/quality/node_modules/eslint/bin/eslint.js . --max-warnings=0",
     "lint:typed": "node tools/quality/node_modules/eslint/bin/eslint.js -c eslint.typed.config.mjs . --max-warnings=0",
@@ -71,7 +71,7 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "packageManager": "npm@11.17.0",
+  "packageManager": "pnpm@10.34.9",
   "lint-staged": {
     "*.{js,jsx,mjs,cjs}": [
       "node tools/quality/staged.mjs --config eslint.config.mjs --",

@@ -30,7 +30,7 @@ export ONE_MSG_TOKEN=your-channel-token
 
 npx -y @1msg/mcp
 # or, after clone + build:
-# npm start
+# pnpm start
 ```
 
 For **test channels**, set `ONE_MSG_BASE_URL=https://sandbox.1msg.io` (bare `sandbox.1msg.io` is also accepted).
@@ -40,15 +40,15 @@ For **test channels**, set `ONE_MSG_BASE_URL=https://sandbox.1msg.io` (bare `san
 ```bash
 git clone https://github.com/1msg/1msg-mcp.git
 cd 1msg-mcp
-npm install
-npm run build
+pnpm install --frozen-lockfile
+pnpm run build
 
 export ONE_MSG_BASE_URL=https://api.1msg.io
 export ONE_MSG_INSTANCE_ID=your-instance-id
 export ONE_MSG_TOKEN=your-channel-token
 
-npm start                 # stdio → dist/index.js
-npm run start:http        # Streamable HTTP → dist/http.js
+pnpm start                 # stdio → dist/index.js
+pnpm run start:http        # Streamable HTTP → dist/http.js
 ```
 
 ## Environment variables
@@ -115,7 +115,7 @@ Header aliases: `X-1msg-Instance-Id` (and deprecated `X-Chat-Api-Instance-Id`). 
 ```bash
 export ONE_MSG_BASE_URL=https://api.1msg.io
 export MCP_HTTP_PORT=3100
-npm run start:http
+pnpm run start:http
 ```
 
 - Auth: `Authorization: Bearer <token>` + `X-Instance-Id: <instanceId>`
@@ -131,12 +131,12 @@ docker run --rm -p 3100:3100 \
 
 ## Scripts
 
-| Script                             | Purpose                                                       |
-| ---------------------------------- | ------------------------------------------------------------- |
-| `npm run build`                    | Compile TypeScript → `dist/`                                  |
-| `npm test`                         | Jest unit tests                                               |
-| `npm run smoke:tools-list`         | Stdio `tools/list` smoke (expects 62 tools; uses dummy token) |
-| `npm start` / `npm run start:http` | Run stdio / HTTP servers                                      |
+| Script                               | Purpose                                                       |
+| ------------------------------------ | ------------------------------------------------------------- |
+| `pnpm run build`                     | Compile TypeScript → `dist/`                                  |
+| `pnpm test`                          | Jest unit tests                                               |
+| `pnpm run smoke:tools-list`          | Stdio `tools/list` smoke (expects 62 tools; uses dummy token) |
+| `pnpm start` / `pnpm run start:http` | Run stdio / HTTP servers                                      |
 
 ## Architecture
 
