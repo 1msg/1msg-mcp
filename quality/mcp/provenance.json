@@ -2,7 +2,7 @@
   "sourceRepository": "https://github.com/1msg/1msg-api",
   "producerSha256": "c6bd3039334b1d4f36d531db1c97596af3467862327d11437c65c42b413df066",
   "contractSha256": "b26aa068f67c892144f2f9f2d9d0ce7a39bb12ff8ad01fd52e68f950fcc2f18c",
-  "sdkVersion": "1.0.3",
+  "sdkVersion": "2.0.2",
   "sdkSignatures": {
     "CallingApi.ts": "129eb7db5b92150022f9da64dae6b85a7db267ae3478e1979f8d71583db458e0",
     "CatalogApi.ts": "b85c2c5a0f61f6cfbfca720a1e0c03a5b9abf7b680cec6b420705329337f7fc8",

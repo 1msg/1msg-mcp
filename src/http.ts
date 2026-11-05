@@ -16,7 +16,7 @@ import { RateLimiter, rateLimitKeyFromToken } from './rate-limit';
 import { createMcpServer } from './server';
 
 const PACKAGE_NAME = '@1msg/mcp';
-const VERSION = '1.2.10';
+const VERSION = '2.0.2';
 
 interface SessionEntry {
   transport: StreamableHTTPServerTransport;
