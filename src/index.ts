@@ -4,7 +4,7 @@ import { loadMcpConfig } from './config';
 import { startMcpServer } from './server';
 
 const PACKAGE_NAME = '@1msg/mcp';
-const VERSION = '1.2.10';
+const VERSION = '2.0.2';
 
 function printUsage(): void {
   const lines = [

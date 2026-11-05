@@ -12,7 +12,7 @@ import { polyfillChannelSettings } from './polyfill-channel-settings';
 import { GENERATED_MCP_TOOLS } from './tools.generated';
 
 const SERVER_NAME = '@1msg/mcp';
-const SERVER_VERSION = '1.2.10';
+const SERVER_VERSION = '2.0.2';
 
 function serializeToolResult(result: unknown): string {
   if (typeof result === 'string') {

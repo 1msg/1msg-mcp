@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@1msg/sdk':
-        specifier: ^1.0.3
-        version: 1.0.3
+        specifier: ^2.0.2
+        version: 2.0.2
       '@modelcontextprotocol/sdk':
         specifier: ^1.29.0
         version: 1.30.0(zod@4.4.3)
@@ -45,8 +45,8 @@ importers:
 
 packages:
 
-  '@1msg/sdk@1.0.3':
-    resolution: {integrity: sha512-6IT6YQkaO4Gh8S4bvP0kWHHMBRvgyyCW5FWLZip4yll6lrZPM6bRtzUxb5DU4/uCuqTCBQ7CrN86cQ0EJpoiHg==}
+  '@1msg/sdk@2.0.2':
+    resolution: {integrity: sha512-tplhNWQ9HUn0UkkOJ2GsZIFg5LhLfyMHyI50GDm6MKFslPUDA0VG+0TLRAHQFJoWEcr+Y+lexIlD+9yAZYg9qA==}
     engines: {node: '>=18.0.0'}
 
   '@babel/code-frame@7.29.7':
@@ -1550,7 +1550,7 @@ packages:
 
 snapshots:
 
-  '@1msg/sdk@1.0.3': {}
+  '@1msg/sdk@2.0.2': {}
 
   '@babel/code-frame@7.29.7':
     dependencies:
