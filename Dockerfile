@@ -6,7 +6,7 @@ FROM node:26.13.1-alpine@sha256:6bd9ab43c0ec0190ca7b2d193906cb8b7edf6e7f4afa43dd
 WORKDIR /app
 RUN npm install --global pnpm@12.18.0 --ignore-scripts --no-audit --no-fund
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --config.dangerously-allow-all-builds=true
 COPY tsconfig.json tsconfig.build.json ./
 COPY src ./src
 RUN pnpm run build && pnpm prune --prod
