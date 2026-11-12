@@ -20,7 +20,7 @@ concurrency:
 jobs:
   publish:
     name: Publish @1msg/mcp
-    runs-on: [self-hosted, 1msg-ci-heavy]
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
       contents: read
