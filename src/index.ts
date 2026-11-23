@@ -4,8 +4,9 @@ import { loadMcpConfig } from './config';
 import { startMcpServer } from './server';
 
 const PACKAGE_NAME = '@1msg/mcp';
-const VERSION = '2.0.2';
+const VERSION = '2.0.4';
 
+/** Print stdio usage, including the optional platform API key. */
 function printUsage(): void {
   const lines = [
     `${PACKAGE_NAME} v${VERSION}`,
@@ -20,7 +21,11 @@ function printUsage(): void {
     '  ONE_MSG_TOKEN          Channel API token',
     '  ONE_MSG_INSTANCE_ID    Channel instance id',
     '',
-    'The server exposes all public 1msg API operations as MCP tools',
+    'Platform API (Inbox and Campaigns, optional):',
+    '  ONE_MSG_PLATFORM_KEY   Platform API key',
+    '  ONE_MSG_PLATFORM_URL   Platform origin (default https://api.1msg.io)',
+    '',
+    'The server exposes the public WhatsApp tools and the platform tools',
     'and delegates HTTP calls to the @1msg/sdk package.',
   ];
   process.stdout.write(`${lines.join('\n')}\n`);

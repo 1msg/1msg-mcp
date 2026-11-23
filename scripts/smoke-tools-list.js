@@ -6,6 +6,7 @@ const { StdioClientTransport } = require('@modelcontextprotocol/sdk/client/stdio
  */
 const path = require('node:path');
 
+/** Connect over stdio and require the WhatsApp tools plus the platform tools. */
 async function main() {
   const serverEntry = path.resolve(__dirname, '../dist/index.js');
   const env = {
@@ -27,19 +28,21 @@ async function main() {
 
   try {
     await client.connect(transport);
+    const { PLATFORM_TOOLS } = require('@1msg/sdk');
     const tools = await client.listTools();
     const count = tools.tools.length;
     const names = tools.tools.map((tool) => tool.name).sort();
-    const hasSendMessage = names.includes('send_message');
+    const expected = 62 + PLATFORM_TOOLS.length;
+    const required = ['send_message', 'platform_list_inbox_channels', 'platform_list_campaigns'];
 
     console.log(`tools/list: ${count} tools`);
-    console.log(`send_message present: ${hasSendMessage}`);
+    console.log(`expected: ${expected}`);
 
-    if (count !== 62) {
-      throw new Error(`Expected 62 tools, got ${count}`);
+    if (count !== expected) {
+      throw new Error(`Expected ${expected} tools, got ${count}`);
     }
-    if (!hasSendMessage) {
-      throw new Error('send_message tool missing');
+    for (const name of required) {
+      if (!names.includes(name)) throw new Error(`${name} tool missing`);
     }
 
     console.log('Smoke test passed');

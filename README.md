@@ -1,6 +1,6 @@
 # @1msg/mcp
 
-MCP server for the [1MSG](https://1msg.io) WhatsApp Business API — **62 public tools** for Cursor, Claude Desktop, and other [MCP](https://modelcontextprotocol.io/) clients.
+MCP server for the [1MSG](https://1msg.io) WhatsApp Business API — **62 public WhatsApp tools**, plus Inbox and Campaigns (`platform_*`) for Cursor, Claude Desktop, and other [MCP](https://modelcontextprotocol.io/) clients.
 
 Transports: **stdio** (local) and **Streamable HTTP** (Cloud).
 
@@ -53,14 +53,16 @@ pnpm run start:http        # Streamable HTTP → dist/http.js
 
 ## Environment variables
 
-| Variable              | Required    | Description                                                                |
-| --------------------- | ----------- | -------------------------------------------------------------------------- |
-| `ONE_MSG_BASE_URL`    | yes (stdio) | API root: `https://api.1msg.io` (live) or `https://sandbox.1msg.io` (test) |
-| `ONE_MSG_TOKEN`       | yes (stdio) | Channel API token                                                          |
-| `ONE_MSG_INSTANCE_ID` | yes (stdio) | Channel instance id                                                        |
-| `MCP_HTTP_HOST`       | no          | HTTP bind host (default `0.0.0.0` in Docker)                               |
-| `MCP_HTTP_PORT`       | no          | HTTP port (default `3100`)                                                 |
-| `MCP_RATE_LIMIT_RPM`  | no          | Per-token rate limit for HTTP (default `60`)                               |
+| Variable               | Required    | Description                                                                |
+| ---------------------- | ----------- | -------------------------------------------------------------------------- |
+| `ONE_MSG_BASE_URL`     | yes (stdio) | API root: `https://api.1msg.io` (live) or `https://sandbox.1msg.io` (test) |
+| `ONE_MSG_TOKEN`        | yes (stdio) | Channel API token                                                          |
+| `ONE_MSG_INSTANCE_ID`  | yes (stdio) | Channel instance id                                                        |
+| `ONE_MSG_PLATFORM_KEY` | no          | Platform API key for Inbox and Campaigns tool calls                        |
+| `ONE_MSG_PLATFORM_URL` | no          | Platform origin (default `https://api.1msg.io`)                            |
+| `MCP_HTTP_HOST`        | no          | HTTP bind host (default `0.0.0.0` in Docker)                               |
+| `MCP_HTTP_PORT`        | no          | HTTP port (default `3100`)                                                 |
+| `MCP_RATE_LIMIT_RPM`   | no          | Per-token rate limit for HTTP (default `60`)                               |
 
 For **Cloud HTTP**, the server default upstream is `ONE_MSG_BASE_URL` (typically live). Clients send credentials per request; test channels can also send `X-1msg-Base-Url: https://sandbox.1msg.io`.
 
@@ -99,14 +101,15 @@ Cloud endpoint: [https://mcp.1msg.io/mcp](https://mcp.1msg.io/mcp)
       "url": "https://mcp.1msg.io/mcp",
       "headers": {
         "Authorization": "Bearer your-channel-token",
-        "X-Instance-Id": "your-instance-id"
+        "X-Instance-Id": "your-instance-id",
+        "X-1msg-Platform-Key": "your-platform-api-key"
       }
     }
   }
 }
 ```
 
-For a **test channel**, add `"X-1msg-Base-Url": "https://sandbox.1msg.io"`.
+For a **test channel**, add `"X-1msg-Base-Url": "https://sandbox.1msg.io"`. Inbox and Campaigns calls use `X-1msg-Platform-Key`. Optional `X-1msg-Platform-Url` overrides the platform origin.
 
 Header aliases: `X-1msg-Instance-Id` (and deprecated `X-Chat-Api-Instance-Id`). Do not commit real tokens.
 
@@ -131,12 +134,12 @@ docker run --rm -p 3100:3100 \
 
 ## Scripts
 
-| Script                               | Purpose                                                       |
-| ------------------------------------ | ------------------------------------------------------------- |
-| `pnpm run build`                     | Compile TypeScript → `dist/`                                  |
-| `pnpm test`                          | Jest unit tests                                               |
-| `pnpm run smoke:tools-list`          | Stdio `tools/list` smoke (expects 62 tools; uses dummy token) |
-| `pnpm start` / `pnpm run start:http` | Run stdio / HTTP servers                                      |
+| Script                               | Purpose                                                                            |
+| ------------------------------------ | ---------------------------------------------------------------------------------- |
+| `pnpm run build`                     | Compile TypeScript → `dist/`                                                       |
+| `pnpm test`                          | Jest unit tests                                                                    |
+| `pnpm run smoke:tools-list`          | Stdio `tools/list` smoke (62 WhatsApp tools plus platform tools; uses dummy token) |
+| `pnpm start` / `pnpm run start:http` | Run stdio / HTTP servers                                                           |
 
 ## Architecture
 

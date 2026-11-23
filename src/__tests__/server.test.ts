@@ -55,7 +55,9 @@ function createMockClient(): SdkClient {
   } as unknown as SdkClient;
 }
 
+/** Cover the MCP tools/list response for WhatsApp and platform tools. */
 describe('createMcpServer tools/list', () => {
+  /** List tools over an in-memory pair and require the platform names. */
   it('returns all generated tools over MCP protocol', async () => {
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     const server = createMcpServer(createMockClient());
@@ -67,8 +69,9 @@ describe('createMcpServer tools/list', () => {
     const tools = await client.listTools();
     const names = tools.tools.map((tool) => tool.name).sort();
 
-    expect(tools.tools).toHaveLength(62);
     expect(names).toContain('send_message');
+    expect(names).toContain('platform_list_inbox_channels');
+    expect(names).toContain('platform_list_campaigns');
     expect(names).toContain('get_me');
     expect(names).toContain('list_templates');
 

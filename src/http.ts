@@ -12,11 +12,12 @@ import { createHash, randomUUID } from 'node:crypto';
 import { McpAuthError, resolveRequestConfig } from './auth';
 import { normalizeBaseUrl, toClientConfig } from './config';
 import { hashIdentifier, logRequest } from './logging';
+import { platformClientFromHeaders } from './platform-tools';
 import { RateLimiter, rateLimitKeyFromToken } from './rate-limit';
 import { createMcpServer } from './server';
 
 const PACKAGE_NAME = '@1msg/mcp';
-const VERSION = '2.0.2';
+const VERSION = '2.0.4';
 
 interface SessionEntry {
   transport: StreamableHTTPServerTransport;
@@ -169,7 +170,7 @@ export function createHttpApp(options: HttpServerOptions): import('express').Exp
         }
       } else if (req.method === 'POST' && isInitializeRequest(req.body)) {
         const client = new Client(toClientConfig(credentials));
-        const server = createMcpServer(client);
+        const server = createMcpServer(client, platformClientFromHeaders(req));
         const transport = new StreamableHTTPServerTransport({
           sessionIdGenerator: () => randomUUID(),
           onsessioninitialized: (sessionId: string) => {
@@ -221,7 +222,7 @@ export function createHttpApp(options: HttpServerOptions): import('express').Exp
         // DNS RR across 3 prod LBs: session lives in one process. Recreate a
         // stateless transport so tools/call still works on a different LB.
         const client = new Client(toClientConfig(credentials));
-        const server = createMcpServer(client);
+        const server = createMcpServer(client, platformClientFromHeaders(req));
         const transport = new StreamableHTTPServerTransport({});
         // The SDK implementation permits undefined callbacks while its Transport
         // interface marks them optional. Both refer to the same runtime contract.
