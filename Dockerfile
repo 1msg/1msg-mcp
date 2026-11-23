@@ -5,7 +5,7 @@
 FROM node:26.13.1-alpine@sha256:6bd9ab43c0ec0190ca7b2d193906cb8b7edf6e7f4afa43ddeccd6452710bffb5 AS build
 WORKDIR /app
 RUN npm install --global pnpm@12.18.0 --ignore-scripts --no-audit --no-fund
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile --config.dangerously-allow-all-builds=true
 COPY tsconfig.json tsconfig.build.json ./
 COPY src ./src
